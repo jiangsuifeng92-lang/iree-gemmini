@@ -1,0 +1,227 @@
+# Copyright 2026 The IREE Authors
+#
+# Licensed under the Apache License v2.0 with LLVM Exceptions.
+# See https://llvm.org/LICENSE.txt for license information.
+# SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+
+load("@rules_python//python:defs.bzl", "py_library")
+load("//build_tools/bazel:iree_python.bzl", "iree_py_dialect_bindings", "iree_py_extension")
+
+package(
+    default_visibility = ["//visibility:public"],
+    licenses = ["notice"],  # Apache 2.0
+)
+
+#===------------------------------------------------------------------------===#
+# Dialect Bindings Generation
+#===------------------------------------------------------------------------===#
+
+iree_py_dialect_bindings(
+    name = "flow_bindings",
+    dialect_name = "flow",
+    td_file = "iree/compiler/dialects/FlowBinding.td",
+    deps = [
+        "//compiler/src/iree/compiler/Dialect/Flow/IR:td_files",
+    ],
+)
+
+iree_py_dialect_bindings(
+    name = "hal_bindings",
+    dialect_name = "hal",
+    td_file = "iree/compiler/dialects/HALBinding.td",
+    deps = [
+        "//compiler/src/iree/compiler/Dialect/HAL/IR:td_files",
+    ],
+)
+
+iree_py_dialect_bindings(
+    name = "stream_bindings",
+    dialect_name = "stream",
+    td_file = "iree/compiler/dialects/StreamBinding.td",
+    deps = [
+        "//compiler/src/iree/compiler/Dialect/Stream/IR:td_files",
+    ],
+)
+
+iree_py_dialect_bindings(
+    name = "util_bindings",
+    dialect_name = "util",
+    td_file = "iree/compiler/dialects/UtilBinding.td",
+    deps = [
+        "//compiler/src/iree/compiler/Dialect/Util/IR:td_files",
+    ],
+)
+
+iree_py_dialect_bindings(
+    name = "vm_bindings",
+    dialect_name = "vm",
+    td_file = "iree/compiler/dialects/VMBinding.td",
+    deps = [
+        "//compiler/src/iree/compiler/Dialect/VM/IR:td_files",
+    ],
+)
+
+iree_py_dialect_bindings(
+    name = "iree_codegen_bindings",
+    dialect_name = "iree_codegen",
+    td_file = "iree/compiler/dialects/IREECodegenBinding.td",
+    deps = [
+        "//compiler/src/iree/compiler/Codegen/Dialect/Codegen/IR:td_files",
+    ],
+)
+
+iree_py_dialect_bindings(
+    name = "iree_gpu_bindings",
+    dialect_name = "iree_gpu",
+    td_file = "iree/compiler/dialects/IREEGPUBinding.td",
+    deps = [
+        "//compiler/src/iree/compiler/Codegen/Dialect/GPU/IR:td_files",
+    ],
+)
+
+iree_py_dialect_bindings(
+    name = "iree_tensor_ext_bindings",
+    dialect_name = "iree_tensor_ext",
+    td_file = "iree/compiler/dialects/TensorExtBinding.td",
+    deps = [
+        "//compiler/src/iree/compiler/Dialect/TensorExt/IR:td_files",
+    ],
+)
+
+iree_py_dialect_bindings(
+    name = "preprocessing_transform_bindings",
+    dialect_name = "transform",
+    gen_enums = False,
+    output_name = "preprocessing_transform",
+    td_file = "iree/compiler/dialects/PreprocessingTransformExtensionsBinding.td",
+    deps = [
+        "//compiler/src/iree/compiler/Preprocessing/TransformExtensions:td_files",
+    ],
+)
+
+iree_py_dialect_bindings(
+    name = "iree_structured_transform_bindings",
+    dialect_name = "transform",
+    gen_enums = False,
+    output_name = "iree_structured_transform",
+    td_file = "//llvm-external-projects/iree-dialects:python/iree/compiler/dialects/IreeStructuredTransformOps.td",
+    deps = [
+        "//llvm-external-projects/iree-dialects:TdFiles",
+    ],
+)
+
+#===------------------------------------------------------------------------===#
+# C++ Extensions
+#===------------------------------------------------------------------------===#
+
+iree_py_extension(
+    name = "_site_initialize_0",
+    srcs = ["IREECompilerRegistration.cpp"],
+    defines = ["MLIR_PYTHON_PACKAGE_PREFIX=iree.compiler."],
+    deps = [
+        "//compiler/src/iree/compiler/API:Impl",
+        "@llvm-project//llvm:Support",
+        "@llvm-project//mlir:MLIRBindingsPythonNanobindHeadersAndDeps",
+    ],
+)
+
+iree_py_extension(
+    name = "_ireeCompilerDialects",
+    srcs = ["IREECompilerDialectsModule.cpp"],
+    defines = ["MLIR_PYTHON_PACKAGE_PREFIX=iree.compiler."],
+    deps = [
+        "//compiler/src/iree/compiler/API:Impl",
+        "@llvm-project//llvm:Support",
+        "@llvm-project//mlir:MLIRBindingsPythonNanobindHeadersAndDeps",
+    ],
+)
+
+iree_py_extension(
+    name = "_ireeDialects",
+    srcs = ["//llvm-external-projects/iree-dialects:python/IREEDialectsModule.cpp"],
+    defines = ["MLIR_PYTHON_PACKAGE_PREFIX=iree.compiler."],
+    deps = [
+        "//llvm-external-projects/iree-dialects:CAPI",
+        "@llvm-project//mlir:CAPIIR",
+        "@llvm-project//mlir:MLIRBindingsPythonNanobindHeadersAndDeps",
+    ],
+)
+
+# Recompile MLIR Core Python Bindings with IREE Prefix
+# MLIR Core defines MLIRBindingsPythonSourceFiles and CAPI targets
+iree_py_extension(
+    name = "_mlir",
+    srcs = [
+        "@llvm-project//mlir:MLIRBindingsPythonSourceFiles",
+        "@llvm-project//mlir:lib/Bindings/Python/MainModule.cpp",
+    ],
+    defines = ["MLIR_PYTHON_PACKAGE_PREFIX=iree.compiler."],
+    deps = [
+        "@llvm-project//mlir:MLIRBindingsPythonCore",
+        "@llvm-project//mlir:MLIRBindingsPythonNanobindHeadersAndDeps",
+    ],
+)
+
+#===------------------------------------------------------------------------===#
+# Python Package Definition
+#===------------------------------------------------------------------------===#
+
+genrule(
+    name = "copy_compiler_libs",
+    srcs = [
+        ":_mlir.so",
+        ":_site_initialize_0.so",
+        ":_ireeCompilerDialects.so",
+        ":_ireeDialects.so",
+        "//tools:iree-compile",
+        "//tools:iree-opt",
+        "//tools:iree-lld",
+        "//tools:iree-link",
+    ],
+    outs = [
+        "iree/compiler/_mlir_libs/_mlir.so",
+        "iree/compiler/_mlir_libs/_site_initialize_0.so",
+        "iree/compiler/_mlir_libs/_ireeCompilerDialects.so",
+        "iree/compiler/_mlir_libs/_ireeDialects.so",
+        "iree/compiler/_mlir_libs/iree-compile",
+        "iree/compiler/_mlir_libs/iree-opt",
+        "iree/compiler/_mlir_libs/iree-lld",
+        "iree/compiler/_mlir_libs/iree-link",
+        "iree/compiler/_mlir_libs/__init__.py",
+    ],
+    cmd = """
+        cp $(location :_mlir.so) $(location iree/compiler/_mlir_libs/_mlir.so)
+        cp $(location :_site_initialize_0.so) $(location iree/compiler/_mlir_libs/_site_initialize_0.so)
+        cp $(location :_ireeCompilerDialects.so) $(location iree/compiler/_mlir_libs/_ireeCompilerDialects.so)
+        cp $(location :_ireeDialects.so) $(location iree/compiler/_mlir_libs/_ireeDialects.so)
+        cp $(location //tools:iree-compile) $(location iree/compiler/_mlir_libs/iree-compile)
+        cp $(location //tools:iree-opt) $(location iree/compiler/_mlir_libs/iree-opt)
+        cp $(location //tools:iree-lld) $(location iree/compiler/_mlir_libs/iree-lld)
+        cp $(location //tools:iree-link) $(location iree/compiler/_mlir_libs/iree-link)
+        touch $(location iree/compiler/_mlir_libs/__init__.py)
+    """,
+)
+
+py_library(
+    name = "compiler",
+    srcs = glob([
+        "iree/compiler/**/*.py",
+    ]),
+    data = [
+        ":copy_compiler_libs",
+        ":flow_bindings",
+        ":hal_bindings",
+        ":iree_codegen_bindings",
+        ":iree_gpu_bindings",
+        ":iree_structured_transform_bindings",
+        ":iree_tensor_ext_bindings",
+        ":preprocessing_transform_bindings",
+        ":stream_bindings",
+        ":util_bindings",
+        ":vm_bindings",
+    ],
+    imports = ["."],
+    deps = [
+        "//llvm-external-projects/iree-dialects:python_bindings",
+    ],
+)

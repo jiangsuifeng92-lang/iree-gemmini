@@ -1,0 +1,420 @@
+// RUN: iree-opt --mlir-print-local-scope --split-input-file --iree-gpu-test-target=gfx942 \
+// RUN: --iree-codegen-llvmgpu-use-igemm=true --iree-codegen-llvmgpu-igemm-pad-convolution=false --pass-pipeline="builtin.module(iree-llvmgpu-select-lowering-strategy)" %s | FileCheck %s --check-prefixes=CHECK,GFX942
+
+// RUN: iree-opt --mlir-print-local-scope --split-input-file --iree-gpu-test-target=mi300x@hip \
+// RUN: --iree-codegen-llvmgpu-use-igemm=true --iree-codegen-llvmgpu-igemm-pad-convolution=false --pass-pipeline="builtin.module(iree-llvmgpu-select-lowering-strategy)" %s | FileCheck %s --check-prefixes=CHECK,MI300X
+
+// RUN: iree-opt --mlir-print-local-scope --split-input-file --iree-gpu-test-target=gfx942 \
+// RUN: --iree-codegen-llvmgpu-use-igemm=true --iree-codegen-llvmgpu-igemm-pad-convolution=true --pass-pipeline="builtin.module(iree-llvmgpu-select-lowering-strategy)" %s | FileCheck %s --check-prefix=PAD-CONV-GFX942
+
+func.func @nhwc_conv_mfma(%3: tensor<2x34x34x128xf32>, %4: tensor<3x3x128x64xf32>) -> tensor<2x32x32x64xf32> {
+  %cst = arith.constant 0.000000e+00 : f32
+  %5 = tensor.empty() : tensor<2x32x32x64xf32>
+  %6 = linalg.fill ins(%cst : f32) outs(%5 : tensor<2x32x32x64xf32>) -> tensor<2x32x32x64xf32>
+  %7 = linalg.conv_2d_nhwc_hwcf {dilations = dense<1> : tensor<2xi64>, strides = dense<1> : tensor<2xi64>} ins(%3, %4 : tensor<2x34x34x128xf32>, tensor<3x3x128x64xf32>) outs(%6 : tensor<2x32x32x64xf32>) -> tensor<2x32x32x64xf32>
+  return %7 : tensor<2x32x32x64xf32>
+}
+
+// CHECK-LABEL: func.func @nhwc_conv_mfma
+//  CHECK-SAME:   #iree_codegen.translation_info<pipeline = LLVMGPUTileAndFuse workgroup_size = [512, 1, 1] subgroup_size = 64
+//  CHECK-SAME:   #iree_gpu.pipeline_options<prefetch_num_stages = 2, no_reduce_shared_memory_bank_conflicts = false
+//  CHECK-SAME:   use_igemm_convolution = true
+
+//       CHECK:   linalg.conv_2d_nhwc_hwcf {{.*}}lowering_config = #iree_gpu.lowering_config
+//  CHECK-SAME:     mma_kind = #iree_gpu.mma_layout<MFMA_F32_16x16x4_F32>
+//  CHECK-SAME:     promote_operands = [0, 1]
+
+//  GFX942-SAME:    reduction = [0, 0, 0, 0, 16]
+//  GFX942-SAME:    subgroup = [1, 2, 1, 2, 0]
+//  GFX942-SAME:    workgroup = [1, 4, 32, 64, 0]
+
+//  MI300X-SAME:    reduction = [0, 0, 0, 0, 16]
+//  MI300X-SAME:    subgroup = [1, 1, 1, 1, 0]
+//  MI300X-SAME:    workgroup = [1, 2, 32, 32, 0]}>
+
+// -----
+
+func.func @nchw_conv_mfma(%3: tensor<2x128x34x34xf32>, %4: tensor<64x128x3x3xf32>) -> tensor<2x64x32x32xf32> {
+  %cst = arith.constant 0.000000e+00 : f32
+  %5 = tensor.empty() : tensor<2x64x32x32xf32>
+  %6 = linalg.fill ins(%cst : f32) outs(%5 : tensor<2x64x32x32xf32>) -> tensor<2x64x32x32xf32>
+  %7 = linalg.conv_2d_nchw_fchw {dilations = dense<1> : tensor<2xi64>, strides = dense<1> : tensor<2xi64>} ins(%3, %4 : tensor<2x128x34x34xf32>, tensor<64x128x3x3xf32>) outs(%6 : tensor<2x64x32x32xf32>) -> tensor<2x64x32x32xf32>
+  return %7 : tensor<2x64x32x32xf32>
+}
+
+// CHECK-LABEL: func.func @nchw_conv_mfma
+//  CHECK-SAME:   #iree_codegen.translation_info<pipeline = LLVMGPUTileAndFuse workgroup_size = [512, 1, 1] subgroup_size = 64
+//  CHECK-SAME:   #iree_gpu.pipeline_options<prefetch_num_stages = 2, no_reduce_shared_memory_bank_conflicts = false
+//  CHECK-SAME:   use_igemm_convolution = true
+
+//       CHECK:   linalg.conv_2d_nchw_fchw {{.*}}lowering_config = #iree_gpu.lowering_config
+//  CHECK-SAME:     mma_kind = #iree_gpu.mma_layout<MFMA_F32_16x16x4_F32>
+//  CHECK-SAME:     promote_operands = [0, 1]
+
+// GFX942-SAME:     reduction = [0, 0, 0, 0, 16]
+// GFX942-SAME:     subgroup = [1, 2, 2, 1, 0]
+// GFX942-SAME:     workgroup = [1, 64, 4, 32, 0]
+
+// MI300X-SAME:     reduction = [0, 0, 0, 0, 16]
+// MI300X-SAME:     subgroup = [1, 1, 1, 1, 0]
+// MI300X-SAME:     workgroup = [1, 32, 2, 32, 0]
+
+// -----
+
+func.func @nhwc_conv_unaligned_mfma(%3: tensor<2x33x33x128xf32>, %4: tensor<3x3x128x64xf32>) -> tensor<2x31x31x64xf32> {
+  %cst = arith.constant 0.000000e+00 : f32
+  %5 = tensor.empty() : tensor<2x31x31x64xf32>
+  %6 = linalg.fill ins(%cst : f32) outs(%5 : tensor<2x31x31x64xf32>) -> tensor<2x31x31x64xf32>
+  %7 = linalg.conv_2d_nhwc_hwcf {dilations = dense<1> : tensor<2xi64>, strides = dense<1> : tensor<2xi64>} ins(%3, %4 : tensor<2x33x33x128xf32>, tensor<3x3x128x64xf32>) outs(%6 : tensor<2x31x31x64xf32>) -> tensor<2x31x31x64xf32>
+  return %7 : tensor<2x31x31x64xf32>
+}
+
+// CHECK-LABEL: func.func @nhwc_conv_unaligned_mfma
+//  CHECK-SAME:   #iree_codegen.translation_info<pipeline = LLVMGPUTileAndFuse workgroup_size = [512, 1, 1] subgroup_size = 64
+//  CHECK-SAME:   #iree_gpu.pipeline_options<prefetch_num_stages = 2, no_reduce_shared_memory_bank_conflicts = false
+//  CHECK-SAME:   use_igemm_convolution = true
+
+//       CHECK:   linalg.conv_2d_nhwc_hwcf {{.*}}lowering_config = #iree_gpu.lowering_config
+//  CHECK-SAME:     mma_kind = #iree_gpu.mma_layout<MFMA_F32_16x16x4_F32>
+
+// GFX942-SAME:     padding = [2, 1, 32, 64, 64]
+// GFX942-SAME:     promote_operands = [0, 1]
+// GFX942-SAME:     reduction = [0, 0, 0, 0, 16]
+// GFX942-SAME:     subgroup = [2, 1, 1, 1, 0]
+// GFX942-SAME:     workgroup = [2, 1, 32, 64, 0]
+
+// MI300X-SAME:     padding = [2, 1, 32, 32, 64]
+// MI300X-SAME:     promote_operands = [0, 1]
+// MI300X-SAME:     reduction = [0, 0, 0, 0, 16]
+// MI300X-SAME:     subgroup = [1, 1, 1, 1, 0]
+// MI300X-SAME:     workgroup = [2, 1, 32, 32, 0]
+
+// PAD-CONV-GFX942:     padding_conv = [2, 1, 32, 64, 0, 0, 0]
+
+// -----
+
+func.func @nchw_conv_unaligned_mfma(%3: tensor<2x128x34x34xf32>, %4: tensor<63x128x3x3xf32>) -> tensor<2x63x32x32xf32> {
+  %cst = arith.constant 0.000000e+00 : f32
+  %5 = tensor.empty() : tensor<2x63x32x32xf32>
+  %6 = linalg.fill ins(%cst : f32) outs(%5 : tensor<2x63x32x32xf32>) -> tensor<2x63x32x32xf32>
+  %7 = linalg.conv_2d_nchw_fchw {dilations = dense<1> : tensor<2xi64>, strides = dense<1> : tensor<2xi64>} ins(%3, %4 : tensor<2x128x34x34xf32>, tensor<63x128x3x3xf32>) outs(%6 : tensor<2x63x32x32xf32>) -> tensor<2x63x32x32xf32>
+  return %7 : tensor<2x63x32x32xf32>
+}
+
+// CHECK-LABEL: func.func @nchw_conv_unaligned_mfma
+//  CHECK-SAME:   #iree_codegen.translation_info<pipeline = LLVMGPUTileAndFuse workgroup_size = [512, 1, 1] subgroup_size = 64
+//  CHECK-SAME:   #iree_gpu.pipeline_options<prefetch_num_stages = 2, no_reduce_shared_memory_bank_conflicts = false
+//  CHECK-SAME:   use_igemm_convolution = true
+
+//       CHECK:   linalg.conv_2d_nchw_fchw {{.*}}lowering_config = #iree_gpu.lowering_config
+//  CHECK-SAME:     mma_kind = #iree_gpu.mma_layout<MFMA_F32_16x16x4_F32>
+
+// GFX942-SAME:     padding = [1, 64, 4, 32, 64]
+// GFX942-SAME:     promote_operands = [0, 1]
+// GFX942-SAME:     reduction = [0, 0, 0, 0, 16]
+// GFX942-SAME:     subgroup = [1, 2, 2, 1, 0]
+// GFX942-SAME:     workgroup = [1, 64, 4, 32, 0]
+
+// MI300X-SAME:     padding = [1, 32, 2, 32, 64]
+// MI300X-SAME:     promote_operands = [0, 1]
+// MI300X-SAME:     reduction = [0, 0, 0, 0, 16]
+// MI300X-SAME:     subgroup = [1, 1, 1, 1, 0]
+// MI300X-SAME:     workgroup = [1, 32, 2, 32, 0]
+
+// PAD-CONV-GFX942-NOT:     padding_conv
+
+// -----
+
+#map = affine_map<(d0, d1, d2, d3, d4, d5, d6) -> (d0, d1 + d4, d2 + d5, d6)>
+#map1 = affine_map<(d0, d1, d2, d3, d4, d5, d6) -> (d3, d4, d5, d6)>
+#map2 = affine_map<(d0, d1, d2, d3, d4, d5, d6) -> (d0, d1, d2, d3)>
+func.func @conv_nhwc_fhwc_unaligned_channel(%arg0: tensor<16x26x19x287xf16>, %arg1: tensor<287x3x3x287xf16>, %arg2: tensor<16x24x17x287xf32>) -> tensor<16x24x17x287xf32> {
+  %0 = linalg.generic {indexing_maps = [#map, #map1, #map2], iterator_types = ["parallel", "parallel", "parallel", "parallel", "reduction", "reduction", "reduction"]} ins(%arg0, %arg1 : tensor<16x26x19x287xf16>, tensor<287x3x3x287xf16>) outs(%arg2 : tensor<16x24x17x287xf32>) {
+  ^bb0(%in: f16, %in_0: f16, %out: f32):
+    %1 = arith.extf %in : f16 to f32
+    %2 = arith.extf %in_0 : f16 to f32
+    %3 = arith.mulf %1, %2 : f32
+    %4 = arith.addf %out, %3 : f32
+    linalg.yield %4 : f32
+  } -> tensor<16x24x17x287xf32>
+  return %0 : tensor<16x24x17x287xf32>
+}
+
+// CHECK-LABEL: func.func @conv_nhwc_fhwc_unaligned_channel
+//  CHECK-SAME:   #iree_codegen.translation_info<pipeline = LLVMGPUTileAndFuse workgroup_size = [512, 1, 1] subgroup_size = 64
+//  CHECK-SAME:   #iree_gpu.pipeline_options<prefetch_num_stages = 2, no_reduce_shared_memory_bank_conflicts = false
+//  CHECK-SAME:   use_igemm_convolution = true
+
+//       CHECK:   linalg.generic {{.*}}lowering_config = #iree_gpu.lowering_config
+//  CHECK-SAME:     mma_kind = #iree_gpu.mma_layout<MFMA_F32_16x16x16_F16>
+
+// GFX942-SAME:     padding = [1, 4, 32, 64, 32]
+// GFX942-SAME:     promote_operands = [0, 1]
+// GFX942-SAME:     reduction = [0, 0, 0, 0, 2]
+// GFX942-SAME:     subgroup = [1, 2, 1, 2, 0]
+// GFX942-SAME:     workgroup = [1, 4, 32, 64, 0]
+
+// MI300X-SAME:     padding = [1, 4, 32, 64, 32]
+// MI300X-SAME:     promote_operands = [0, 1]
+// MI300X-SAME:     reduction = [0, 0, 0, 0, 2]
+// MI300X-SAME:     subgroup = [1, 2, 1, 2, 0]
+// MI300X-SAME:     workgroup = [1, 4, 32, 64, 0]
+
+// PAD-CONV-GFX942:     padding_conv = [1, 4, 32, 64, 0, 0, 32]
+
+// -----
+
+#map = affine_map<(d0, d1, d2, d3, d4, d5, d6) -> (d4, d1 + d5 * 2, d2 + d6 * 2, d3)>
+#map1 = affine_map<(d0, d1, d2, d3, d4, d5, d6) -> (d4, d5, d6, d0)>
+#map2 = affine_map<(d0, d1, d2, d3, d4, d5, d6) -> (d0, d1, d2, d3)>
+func.func @conv_chwn_chwf_unaligned_batch(%arg0: tensor<16x193x129x40xbf16>, %arg1: tensor<16x96x64x40xbf16>, %arg2: tensor<40x3x3x40xf32>) -> tensor<40x3x3x40xf32> {
+  %0 = linalg.generic {indexing_maps = [#map, #map1, #map2], iterator_types = ["parallel", "parallel", "parallel", "parallel", "reduction", "reduction", "reduction"]} ins(%arg0, %arg1 : tensor<16x193x129x40xbf16>, tensor<16x96x64x40xbf16>) outs(%arg2 : tensor<40x3x3x40xf32>) {
+  ^bb0(%in: bf16, %in_0: bf16, %out: f32):
+    %1 = arith.extf %in : bf16 to f32
+    %2 = arith.extf %in_0 : bf16 to f32
+    %3 = arith.mulf %1, %2 : f32
+    %4 = arith.addf %out, %3 : f32
+    linalg.yield %4 : f32
+  } -> tensor<40x3x3x40xf32>
+  return %0 : tensor<40x3x3x40xf32>
+}
+
+// CHECK-LABEL: func.func @conv_chwn_chwf_unaligned_batch
+//  CHECK-SAME:   #iree_codegen.translation_info<pipeline = LLVMGPUTileAndFuse workgroup_size = [64, 1, 1] subgroup_size = 64
+//  CHECK-SAME:   #iree_gpu.pipeline_options<prefetch_num_stages = 2, no_reduce_shared_memory_bank_conflicts = false
+//  CHECK-SAME:   use_igemm_convolution = true
+
+//       CHECK:   linalg.generic {{.*}}lowering_config = #iree_gpu.lowering_config
+//  CHECK-SAME:     mma_kind = #iree_gpu.mma_layout<MFMA_F32_16x16x16_BF16>
+//  CHECK-SAME:     padding = [16, 1, 1, 16, 128]
+//  CHECK-SAME:     promote_operands = [0, 1]
+//  CHECK-SAME:     reduction = [0, 0, 0, 0, 8]
+//  CHECK-SAME:     subgroup = [1, 1, 1, 1, 0]
+//  CHECK-SAME:     workgroup = [16, 1, 1, 16, 0]
+
+// PAD-CONV-GFX942:     padding_conv =  [0, 0, 0, 16, 0, 0, 0]
+
+// -----
+
+#map = affine_map<(d0, d1, d2, d3, d4, d5, d6) -> (d0 + d4, d1 + d5, d2, d6)>
+#map1 = affine_map<(d0, d1, d2, d3, d4, d5, d6) -> (d2, d3, d4, d5, d6)>
+#map2 = affine_map<(d0, d1, d2, d3, d4, d5, d6) -> (d0, d1, d2, d3)>
+func.func @group_conv_hwgc_gfhwc_unaligned(%arg0: tensor<61x93x16x55xbf16>, %arg1: tensor<16x56x3x3x55xbf16>, %arg2: tensor<59x91x16x56xf32>) -> tensor<59x91x16x56xf32> {
+  %0 = linalg.generic {indexing_maps = [#map, #map1, #map2], iterator_types = ["parallel", "parallel", "parallel", "parallel", "reduction", "reduction", "reduction"]} ins(%arg0, %arg1 : tensor<61x93x16x55xbf16>, tensor<16x56x3x3x55xbf16>) outs(%arg2 : tensor<59x91x16x56xf32>) {
+    ^bb0(%in: bf16, %in_4: bf16, %out: f32):
+      %10 = arith.extf %in : bf16 to f32
+      %11 = arith.extf %in_4 : bf16 to f32
+      %12 = arith.mulf %10, %11 : f32
+      %13 = arith.addf %out, %12 : f32
+      linalg.yield %13 : f32
+    } -> tensor<59x91x16x56xf32>
+  return %0 : tensor<59x91x16x56xf32>
+}
+
+// CHECK-LABEL: func.func @group_conv_hwgc_gfhwc_unaligned
+//  CHECK-SAME:   #iree_codegen.translation_info<pipeline = LLVMGPUTileAndFuse workgroup_size = [512, 1, 1] subgroup_size = 64
+//  CHECK-SAME:   #iree_gpu.pipeline_options<prefetch_num_stages = 2, no_reduce_shared_memory_bank_conflicts = false
+//  CHECK-SAME:   use_igemm_convolution = true
+
+//       CHECK:   linalg.generic {{.*}}lowering_config = #iree_gpu.lowering_config
+// GFX942-SAME:     mma_kind = #iree_gpu.mma_layout<MFMA_F32_16x16x16_BF16>
+// GFX942-SAME:     padding = [4, 32, 1, 64, 16]
+// GFX942-SAME:     promote_operands = [0, 1]
+// GFX942-SAME:     reduction = [0, 0, 0, 0, 1]
+// GFX942-SAME:     subgroup = [2, 1, 0, 2, 0]
+// GFX942-SAME:     workgroup = [4, 32, 1, 64, 0]
+
+// MI300X-SAME:     padding = [2, 32, 1, 32, 16]
+// MI300X-SAME:     promote_operands = [0, 1]
+// MI300X-SAME:     reduction = [0, 0, 0, 0, 1]
+// MI300X-SAME:     subgroup = [1, 1, 0, 1, 0]
+// MI300X-SAME:     workgroup = [2, 32, 1, 32, 0]
+
+// PAD-CONV-GFX942:     padding_conv = [4, 32, 1, 64, 0, 0, 16]
+
+// -----
+
+#map = affine_map<(d0, d1, d2, d3, d4, d5) -> (d0, d1 + d4, d2, d5)>
+#map1 = affine_map<(d0, d1, d2, d3, d4, d5) -> (d3, d4, d5)>
+#map2 = affine_map<(d0, d1, d2, d3, d4, d5) -> (d0, d1, d2, d3)>
+module {
+  func.func @conv_nhwc_filter_5x1_unaligned(%arg0: tensor<16x42x19x64xbf16>, %arg1: tensor<64x5x64xbf16>, %arg2: tensor<16x38x19x64xf32>) -> tensor<16x38x19x64xf32> {
+    %0 = linalg.generic {indexing_maps = [#map, #map1, #map2], iterator_types = ["parallel", "parallel", "parallel", "parallel", "reduction", "reduction"]} ins(%arg0, %arg1 : tensor<16x42x19x64xbf16>, tensor<64x5x64xbf16>) outs(%arg2 : tensor<16x38x19x64xf32>) {
+    ^bb0(%in: bf16, %in_0: bf16, %out: f32):
+      %1 = arith.extf %in : bf16 to f32
+      %2 = arith.extf %in_0 : bf16 to f32
+      %3 = arith.mulf %1, %2 : f32
+      %4 = arith.addf %out, %3 : f32
+      linalg.yield %4 : f32
+    } -> tensor<16x38x19x64xf32>
+    return %0 : tensor<16x38x19x64xf32>
+  }
+}
+
+// CHECK-LABEL: func.func @conv_nhwc_filter_5x1_unaligned
+//  CHECK-SAME:   #iree_codegen.translation_info<pipeline = LLVMGPUTileAndFuse workgroup_size = [512, 1, 1] subgroup_size = 64
+//  CHECK-SAME:   #iree_gpu.pipeline_options<prefetch_num_stages = 2, no_reduce_shared_memory_bank_conflicts = false
+//  CHECK-SAME:   use_igemm_convolution = true
+
+//       CHECK:   linalg.generic {{.*}}lowering_config = #iree_gpu.lowering_config
+// GFX942-SAME:     mma_kind = #iree_gpu.mma_layout<MFMA_F32_16x16x16_BF16>
+// GFX942-SAME:     padding = [1, 4, 32, 64, 64]
+// GFX942-SAME:     promote_operands = [0, 1]
+// GFX942-SAME:     reduction = [0, 0, 0, 0, 4]
+// GFX942-SAME:     subgroup = [1, 2, 1, 2, 0]
+// GFX942-SAME:     workgroup = [1, 4, 32, 64, 0]
+
+// MI300X-SAME:     padding = [1, 2, 32, 64, 64]
+// MI300X-SAME:     promote_operands = [0, 1]
+// MI300X-SAME:     reduction = [0, 0, 0, 0, 4]
+// MI300X-SAME:     subgroup = [1, 1, 1, 2, 0]
+// MI300X-SAME:     workgroup = [1, 2, 32, 64, 0]
+
+// PAD-CONV-GFX942:     padding_conv = [1, 4, 32, 64, 0, 0]
+
+// -----
+
+#map = affine_map<(d0, d1, d2, d3, d4, d5, d6) -> (d4, d1 + d5 * 2, d2 + d6 * 2, d3)>
+#map1 = affine_map<(d0, d1, d2, d3, d4, d5, d6) -> (d4, d5, d6, d0)>
+#map2 = affine_map<(d0, d1, d2, d3, d4, d5, d6) -> (d0, d1, d2, d3)>
+func.func @conv_chwn_chwf_aligned_batch(%arg0: tensor<2x192x128x48xbf16>, %arg1: tensor<2x95x63x40xbf16>, %arg2: tensor<40x3x3x48xf32>) -> tensor<40x3x3x48xf32> {
+  %0 = linalg.generic {indexing_maps = [#map, #map1, #map2], iterator_types = ["parallel", "parallel", "parallel", "parallel", "reduction", "reduction", "reduction"]} ins(%arg0, %arg1 : tensor<2x192x128x48xbf16>, tensor<2x95x63x40xbf16>) outs(%arg2 : tensor<40x3x3x48xf32>) {
+  ^bb0(%in: bf16, %in_0: bf16, %out: f32):
+    %1 = arith.extf %in : bf16 to f32
+    %2 = arith.extf %in_0 : bf16 to f32
+    %3 = arith.mulf %1, %2 : f32
+    %4 = arith.addf %out, %3 : f32
+    linalg.yield %4 : f32
+  } -> tensor<40x3x3x48xf32>
+  return %0 : tensor<40x3x3x48xf32>
+}
+
+//         CHECK-LABEL:  func.func @conv_chwn_chwf_aligned_batch
+//     PAD-CONV-GFX942:     padding = [16, 1, 1, 16, 16]
+// PAD-CONV-GFX942-NOT:     padding_conv
+
+// -----
+
+#map = affine_map<(d0, d1, d2, d3, d4, d5, d6) -> (d0, d1 + d4, d2 + d5, d6)>
+#map1 = affine_map<(d0, d1, d2, d3, d4, d5, d6) -> (d3, d4, d5, d6)>
+#map2 = affine_map<(d0, d1, d2, d3, d4, d5, d6) -> (d0, d1, d2, d3)>
+func.func @conv_nhwc_small_channel_size(%arg0: tensor<16x26x19x3xf16>, %arg1: tensor<287x3x3x3xf16>, %arg2: tensor<16x24x17x287xf32>) -> tensor<16x24x17x287xf32> {
+  %0 = linalg.generic {indexing_maps = [#map, #map1, #map2], iterator_types = ["parallel", "parallel", "parallel", "parallel", "reduction", "reduction", "reduction"]} ins(%arg0, %arg1 : tensor<16x26x19x3xf16>, tensor<287x3x3x3xf16>) outs(%arg2 : tensor<16x24x17x287xf32>) {
+  ^bb0(%in: f16, %in_0: f16, %out: f32):
+    %1 = arith.extf %in : f16 to f32
+    %2 = arith.extf %in_0 : f16 to f32
+    %3 = arith.mulf %1, %2 : f32
+    %4 = arith.addf %out, %3 : f32
+    linalg.yield %4 : f32
+  } -> tensor<16x24x17x287xf32>
+  return %0 : tensor<16x24x17x287xf32>
+}
+
+//     CHECK-LABEL:  func.func @conv_nhwc_small_channel_size
+// PAD-CONV-GFX942:     padding = [1, 4, 32, 64, 32]
+// PAD-CONV-GFX942:     padding_conv = [1, 4, 32, 64, 0, 0, 0]
+
+// -----
+// This test is to check that we c promote in such cases since we have codegen issues with this case
+// see https://github.com/iree-org/iree/issues/23038
+func.func @nhwc_conv_mfma_biasadd(%3: tensor<2x35x35x128xf32>, %4: tensor<3x3x128x64xf32>, %5 : tensor<2x33x33x64xf32>) -> tensor<2x33x33x64xf32> {
+  %cst = arith.constant 0.000000e+00 : f32
+  %empty = tensor.empty() : tensor<2x33x33x64xf32>
+  %6 = linalg.fill ins(%cst : f32) outs(%5 : tensor<2x33x33x64xf32>) -> tensor<2x33x33x64xf32>
+  %7 = linalg.conv_2d_nhwc_hwcf {dilations = dense<1> : tensor<2xi64>, strides = dense<1> : tensor<2xi64>} ins(%3, %4 : tensor<2x35x35x128xf32>, tensor<3x3x128x64xf32>) outs(%empty : tensor<2x33x33x64xf32>) -> tensor<2x33x33x64xf32>
+  %8 = linalg.generic {indexing_maps = [affine_map<(d0, d1, d2, d3) -> (d0, d1, d2, d3)>,
+                                        affine_map<(d0, d1, d2, d3) -> (d0, d1, d2, d3)>,
+                                        affine_map<(d0, d1, d2, d3) -> (d0, d1, d2, d3)>],
+                                        iterator_types = ["parallel", "parallel", "parallel", "parallel"]}
+      ins(%7, %5 : tensor<2x33x33x64xf32>, tensor<2x33x33x64xf32>) outs(%empty : tensor<2x33x33x64xf32>)   {
+      ^bb0(%in: f32, %in_0: f32, %out: f32):
+        %18 = arith.addf %in, %in_0 : f32
+        linalg.yield %18 : f32
+      }  -> tensor<2x33x33x64xf32>
+  return %7 : tensor<2x33x33x64xf32>
+}
+
+//     CHECK-LABEL: nhwc_conv_mfma_biasadd
+//           CHECK: promote_operands = [0, 1, 2]
+
+// -----
+// Check that we dont c promote if there is no additional operand
+func.func @nhwc_conv_mfma_truncf(%3: tensor<2x35x35x128xf32>, %4: tensor<3x3x128x64xf32>, %5 : tensor<2x33x33x64xf32>) -> tensor<2x33x33x64xf16> {
+  %cst = arith.constant 0.000000e+00 : f32
+  %empty = tensor.empty() : tensor<2x33x33x64xf32>
+  %empty2 = tensor.empty() : tensor<2x33x33x64xf16>
+  %6 = linalg.fill ins(%cst : f32) outs(%5 : tensor<2x33x33x64xf32>) -> tensor<2x33x33x64xf32>
+  %7 = linalg.conv_2d_nhwc_hwcf {dilations = dense<1> : tensor<2xi64>, strides = dense<1> : tensor<2xi64>} ins(%3, %4 : tensor<2x35x35x128xf32>, tensor<3x3x128x64xf32>) outs(%empty : tensor<2x33x33x64xf32>) -> tensor<2x33x33x64xf32>
+  %8 = linalg.generic {indexing_maps = [affine_map<(d0, d1, d2, d3) -> (d0, d1, d2, d3)>,
+                                        affine_map<(d0, d1, d2, d3) -> (d0, d1, d2, d3)>],
+                      iterator_types = ["parallel", "parallel", "parallel", "parallel"]}
+       ins(%7 : tensor<2x33x33x64xf32>) outs(%empty2 : tensor<2x33x33x64xf16>)   {
+       ^bb0(%in: f32, %out: f16):
+         %18 = arith.truncf %in : f32 to f16
+        linalg.yield %18 : f16
+       }  -> tensor<2x33x33x64xf16>
+  return %8 : tensor<2x33x33x64xf16>
+}
+
+//     CHECK-LABEL: nhwc_conv_mfma_truncf
+//           CHECK: promote_operands = [0, 1]
+
+// -----
+
+func.func @conv_with_dps_init_producer(
+    %lhs: tensor<2x64x58x58xf32>, %rhs: tensor<2x64x64x3x3xf32>,
+    %init: tensor<2x64xf32>) -> tensor<2x64x28x28xf32> {
+  %0 = tensor.empty() : tensor<2x64x28x28xf32>
+  %1 = linalg.generic {
+    indexing_maps = [affine_map<(d0, d1, d2, d3) -> (d0, d1)>,
+                     affine_map<(d0, d1, d2, d3) -> (d0, d1, d2, d3)>],
+    iterator_types = ["parallel", "parallel", "parallel", "parallel"]}
+    ins(%init : tensor<2x64xf32>) outs(%0 : tensor<2x64x28x28xf32>) {
+  ^bb0(%in: f32, %out: f32):
+    linalg.yield %in : f32
+  } -> tensor<2x64x28x28xf32>
+  %2 = linalg.generic {
+    indexing_maps = [affine_map<(d0, d1, d2, d3, d4, d5, d6) -> (d0, d4, d2 * 2 + d5, d3 * 2 + d6)>,
+                     affine_map<(d0, d1, d2, d3, d4, d5, d6) -> (d0, d1, d4, d5, d6)>,
+                     affine_map<(d0, d1, d2, d3, d4, d5, d6) -> (d0, d1, d2, d3)>],
+    iterator_types = ["parallel", "parallel", "parallel", "parallel", "reduction", "reduction", "reduction"]}
+    ins(%lhs, %rhs : tensor<2x64x58x58xf32>, tensor<2x64x64x3x3xf32>) outs(%1 : tensor<2x64x28x28xf32>) {
+  ^bb0(%in: f32, %in_0: f32, %out: f32):
+    %3 = arith.mulf %in, %in_0 : f32
+    %4 = arith.addf %out, %3 : f32
+    linalg.yield %4 : f32
+  } -> tensor<2x64x28x28xf32>
+  return %2 : tensor<2x64x28x28xf32>
+}
+
+//     CHECK-LABEL: conv_with_dps_init_producer
+//           CHECK: promote_operands = [0, 1, 2]
+
+// -----
+
+// Backward weight conv where M=F=2376 has a prime tile count (149),
+// causing GCD to fail; the min-based distribution override assigns tiles to M.
+#map_bwd_lhs = affine_map<(d0, d1, d2, d3, d4, d5, d6) -> (d4, d1 + d5, d2 + d6, d3)>
+#map_bwd_rhs = affine_map<(d0, d1, d2, d3, d4, d5, d6) -> (d4, d5, d6, d0)>
+#map_bwd_out = affine_map<(d0, d1, d2, d3, d4, d5, d6) -> (d0, d1, d2, d3)>
+func.func @conv_bwd_weight_igemm(%lhs: tensor<32x27x27x256xf16>, %rhs: tensor<32x25x25x2376xf16>) -> tensor<2376x3x3x256xf32> {
+  %cst = arith.constant 0.000000e+00 : f32
+  %empty = tensor.empty() : tensor<2376x3x3x256xf32>
+  %fill = linalg.fill ins(%cst : f32) outs(%empty : tensor<2376x3x3x256xf32>) -> tensor<2376x3x3x256xf32>
+  %result = linalg.generic {indexing_maps = [#map_bwd_lhs, #map_bwd_rhs, #map_bwd_out], iterator_types = ["parallel", "parallel", "parallel", "parallel", "reduction", "reduction", "reduction"]} ins(%lhs, %rhs : tensor<32x27x27x256xf16>, tensor<32x25x25x2376xf16>) outs(%fill : tensor<2376x3x3x256xf32>) {
+  ^bb0(%in: f16, %in_1: f16, %out: f32):
+    %0 = arith.extf %in : f16 to f32
+    %1 = arith.extf %in_1 : f16 to f32
+    %2 = arith.mulf %0, %1 : f32
+    %3 = arith.addf %2, %out : f32
+    linalg.yield %3 : f32
+  } -> tensor<2376x3x3x256xf32>
+  return %result : tensor<2376x3x3x256xf32>
+}
+
+//     CHECK-LABEL: conv_bwd_weight_igemm
+//           CHECK:   linalg.generic {{.*}}lowering_config = #iree_gpu.lowering_config
+//      CHECK-SAME:     mma_kind = #iree_gpu.mma_layout<MFMA_F32_16x16x16_F16>
+//      CHECK-SAME:     reduction = [0, 0, 0, 0, 2]
+//      CHECK-SAME:     subgroup = [4, 1, 1, 2, 0]
+//      CHECK-SAME:     workgroup = [64, 1, 1, 128, 0]

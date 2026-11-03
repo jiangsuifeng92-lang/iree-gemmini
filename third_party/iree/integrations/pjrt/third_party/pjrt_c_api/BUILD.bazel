@@ -1,0 +1,38 @@
+# Copyright 2025 The IREE Authors
+#
+# Licensed under the Apache License v2.0 with LLVM Exceptions.
+# See https://llvm.org/LICENSE.txt for license information.
+# SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+
+package(
+    default_visibility = ["//visibility:public"],
+    features = ["layering_check"],
+    licenses = ["notice"],  # Apache 2.0
+)
+
+cc_library(
+    name = "pjrt_c_api",
+    hdrs = [ "xla/pjrt/c/pjrt_c_api.h" ],
+    includes = [ "." ],
+)
+
+proto_library(
+    name = "xla_data-proto",
+    srcs = [ "xla/xla_data.proto" ],
+    # import_prefix = "xla",
+    strip_import_prefix = "",
+)
+
+proto_library(
+    name = "compile_options-proto",
+    srcs = [ "xla/pjrt/compile_options.proto" ],
+    deps = [ ":xla_data-proto" ],
+    exports = [ ":xla_data-proto" ],
+    # import_prefix = "xla/pjrt",
+    strip_import_prefix = "",
+)
+
+cc_proto_library(
+    name = "compile_options_cc_proto",
+    deps = [":compile_options-proto"],
+)

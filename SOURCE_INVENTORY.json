@@ -1,0 +1,162 @@
+{
+  "date": "2026-11-03",
+  "excludes": "Git-ignored build outputs; inventory excludes itself",
+  "components": {
+    ".gitattributes": {
+      "regular_files": 1,
+      "bytes": 83
+    },
+    ".gitignore": {
+      "regular_files": 1,
+      "bytes": 191
+    },
+    "F_gemmini_backend/CMakeLists.txt": {
+      "regular_files": 1,
+      "bytes": 2126
+    },
+    "F_gemmini_backend/apps": {
+      "regular_files": 7,
+      "bytes": 365742
+    },
+    "F_gemmini_backend/build_tools": {
+      "regular_files": 1,
+      "bytes": 292
+    },
+    "F_gemmini_backend/compiler": {
+      "regular_files": 22,
+      "bytes": 168437
+    },
+    "F_gemmini_backend/env.sh": {
+      "regular_files": 1,
+      "bytes": 70
+    },
+    "F_gemmini_backend/kernels": {
+      "regular_files": 1,
+      "bytes": 24198
+    },
+    "F_gemmini_backend/runtime": {
+      "regular_files": 675,
+      "bytes": 5157701
+    },
+    "F_gemmini_backend/toolchain": {
+      "regular_files": 1589,
+      "bytes": 193003913
+    },
+    "G_arm_gemmini/cmake": {
+      "regular_files": 2,
+      "bytes": 1761
+    },
+    "G_arm_gemmini/env.sh": {
+      "regular_files": 1,
+      "bytes": 70
+    },
+    "G_arm_gemmini/firmware": {
+      "regular_files": 15,
+      "bytes": 65248
+    },
+    "G_arm_gemmini/hardware": {
+      "regular_files": 1,
+      "bytes": 4579
+    },
+    "G_arm_gemmini/include": {
+      "regular_files": 3,
+      "bytes": 12632
+    },
+    "G_arm_gemmini/models": {
+      "regular_files": 1,
+      "bytes": 432
+    },
+    "G_arm_gemmini/rtl": {
+      "regular_files": 2,
+      "bytes": 12813
+    },
+    "G_arm_gemmini/runtime": {
+      "regular_files": 2,
+      "bytes": 65446
+    },
+    "G_arm_gemmini/scripts": {
+      "regular_files": 9,
+      "bytes": 26453
+    },
+    "G_arm_gemmini/sim": {
+      "regular_files": 2,
+      "bytes": 12180
+    },
+    "G_arm_gemmini/third_party": {
+      "regular_files": 4,
+      "bytes": 68226
+    },
+    "G_arm_gemmini/toolchain": {
+      "regular_files": 138,
+      "bytes": 16901508
+    },
+    "Makefile": {
+      "regular_files": 1,
+      "bytes": 552
+    },
+    "README.md": {
+      "regular_files": 1,
+      "bytes": 8350
+    },
+    "SOURCE_ORIGINS.json": {
+      "regular_files": 1,
+      "bytes": 19057
+    },
+    "VALIDATION.md": {
+      "regular_files": 1,
+      "bytes": 2374
+    },
+    "config": {
+      "regular_files": 1,
+      "bytes": 578
+    },
+    "docs": {
+      "regular_files": 1,
+      "bytes": 8180
+    },
+    "env.sh": {
+      "regular_files": 1,
+      "bytes": 1760
+    },
+    "include": {
+      "regular_files": 4,
+      "bytes": 8249
+    },
+    "licenses": {
+      "regular_files": 6,
+      "bytes": 18770
+    },
+    "reference": {
+      "regular_files": 6,
+      "bytes": 28065
+    },
+    "rtl": {
+      "regular_files": 668,
+      "bytes": 26169133
+    },
+    "scripts": {
+      "regular_files": 12,
+      "bytes": 14335
+    },
+    "sim": {
+      "regular_files": 18,
+      "bytes": 38523
+    },
+    "third_party/DRAMSim2": {
+      "regular_files": 56,
+      "bytes": 518612
+    },
+    "third_party/iree": {
+      "regular_files": 22971,
+      "bytes": 249855529
+    },
+    "third_party/llvm-project": {
+      "regular_files": 172136,
+      "bytes": 2078252231
+    },
+    "third_party/riscv-isa-sim": {
+      "regular_files": 1346,
+      "bytes": 2837066
+    }
+  }
+}

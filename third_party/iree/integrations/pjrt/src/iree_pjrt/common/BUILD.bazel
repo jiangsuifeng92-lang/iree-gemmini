@@ -1,0 +1,94 @@
+# Copyright 2025 The IREE Authors
+#
+# Licensed under the Apache License v2.0 with LLVM Exceptions.
+# See https://llvm.org/LICENSE.txt for license information.
+# SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+
+package(
+    default_visibility = ["//visibility:public"],
+    features = ["layering_check"],
+    licenses = ["notice"],  # Apache 2.0
+)
+
+cc_library(
+    name = "common",
+    hdrs = [
+        "api_impl.h",
+        "dylib_entry_point.cc.inc",
+        "iree_helpers.h",
+        "layout_utils.h",
+        "platform.h",
+        "tensor_utils.h",
+    ],
+    srcs = [
+        "api_impl.cc",
+        "layout_utils.cc",
+        "platform.cc",
+        "tensor_utils.cc",
+    ],
+    deps = [
+        ":compiler",
+        ":stubs",
+        ":debugging",
+        "//integrations/pjrt/third_party/pjrt_c_api",
+        "//runtime/src/iree/base:base",
+        "//runtime/src/iree/hal:hal",
+        "//runtime/src/iree/modules/hal:hal",
+        "//runtime/src/iree/vm:vm",
+        "//runtime/src/iree/vm/bytecode:module",
+        "//integrations/pjrt/third_party/pjrt_c_api:compile_options_cc_proto",
+    ],
+)
+
+cc_library(
+    name = "stubs",
+    textual_hdrs = [ "stubs.inc" ],
+    includes = [ "." ],
+)
+
+cc_library(
+    name = "compiler",
+    hdrs = [ "compiler.h" ],
+    srcs = [
+      "hlo_partitioner.cc",
+      "iree_compiler.cc",
+    ],
+    deps = [
+        ":debugging",
+        "//compiler/bindings/c:headers",
+        "//compiler/bindings/c:loader",
+        "//integrations/pjrt/src/iree_pjrt/partitioner_api:loader",
+        "//integrations/pjrt/src/iree_pjrt/partitioner_api:partitioner_api",
+        "//integrations/pjrt/third_party/pjrt_c_api:compile_options_cc_proto",
+    ],
+)
+
+cc_library(
+    name = "debugging",
+    hdrs = [ "debugging.h" ],
+    srcs = [ "debugging.cc" ],
+    includes = [ "../../" ],
+)
+
+cc_library(
+    name = "dylib_platform",
+    hdrs = [
+        "dylib_platform.h",
+        "command_line_utils.h",
+    ],
+    srcs = [
+        "dylib_platform.cc",
+        "command_line_utils.cc",
+    ],
+    deps = [
+        ":common",
+        ":debugging",
+        "//runtime/src/iree/base/internal:path",
+        "//runtime/src/iree/base:base",
+        "//integrations/pjrt/third_party/pjrt_c_api",
+        "//compiler/bindings/c:headers",
+        "//compiler/bindings/c:loader",
+        "//integrations/pjrt/src/iree_pjrt/partitioner_api:loader",
+        "//integrations/pjrt/src/iree_pjrt/partitioner_api:partitioner_api",
+    ],
+)

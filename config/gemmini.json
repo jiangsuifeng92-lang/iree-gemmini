@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "hardware": {
+    "dim": 16,
+    "bank_num": 4,
+    "bank_rows": 4096,
+    "acc_rows": 1024,
+    "custom_opcode": 3,
+    "input_bits": 8,
+    "acc_bits": 32,
+    "dma_max_bytes": 64
+  },
+  "kernel_limits": {
+    "max_m": 512,
+    "max_n": 1024,
+    "max_k": 1152,
+    "im2col_rows": 128
+  },
+  "planner": {
+    "im2col_target_bytes": 65536,
+    "command_cost_bytes": 1024
+  },
+  "layout": {
+    "direct_a": 1,
+    "direct_b": 2,
+    "direct_c": 4,
+    "pack_a": 8,
+    "pack_b": 16,
+    "pack_c": 32
+  },
+  "epilogue": {
+    "identity_mvout": 1
+  }
+}

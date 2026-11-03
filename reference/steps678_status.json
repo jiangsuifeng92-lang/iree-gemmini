@@ -1,0 +1,238 @@
+{
+  "recorded_at": "2026-10-28T02:50:10.345848+00:00",
+  "scope": "H only; steps 6, 7, 8 compiler and firmware build",
+  "compiler_build": "success",
+  "mnist_firmware_build": "success",
+  "original_sources": {
+    "files_reviewed": 798,
+    "changed": [],
+    "all_unchanged": true
+  },
+  "baseline_compiled_dispatch_entries": 108,
+  "compiled_dispatch_entries": 8,
+  "entry_names": [
+    "main_dispatch_0_conv_24x24x10x5x5_i8xi8xi32",
+    "main_dispatch_1_conv_12x12x10x2x2_i8xf32xi8",
+    "main_dispatch_2_conv_8x8x20x5x5x10_i8xi8xi32",
+    "main_dispatch_3_conv_4x4x20x2x2_i8xf32xi8",
+    "main_dispatch_4_vecmat_50x320_i8xi8xi32",
+    "main_dispatch_5_vecmat_10x50_i8xi8xi32",
+    "main_dispatch_6_reduction_10_f32",
+    "main_dispatch_7_elementwise_10_f32"
+  ],
+  "graph_restorations": [
+    {
+      "event": "restore_im2col_convolution",
+      "count": 25
+    },
+    {
+      "event": "restore_im2col_convolution",
+      "count": 25
+    }
+  ],
+  "gemmini_selected_entry_count": 4,
+  "plans": [
+    {
+      "event": "tile",
+      "function": "main_dispatch_5_vecmat_10x50_i8xi8xi32",
+      "M": 1,
+      "N": 10,
+      "K": 50,
+      "abi": 1,
+      "tile_i": 1,
+      "tile_j": 1,
+      "tile_k": 4,
+      "block_m": 1,
+      "layout_flags": 0,
+      "forwarded_copies": 0
+    },
+    {
+      "event": "tile",
+      "function": "main_dispatch_0_conv_24x24x10x5x5_i8xi8xi32",
+      "M": 576,
+      "N": 10,
+      "K": 25,
+      "abi": 1,
+      "tile_i": 8,
+      "tile_j": 1,
+      "tile_k": 2,
+      "block_m": 128,
+      "layout_flags": 0,
+      "forwarded_copies": 0
+    },
+    {
+      "event": "tile",
+      "function": "main_dispatch_4_vecmat_50x320_i8xi8xi32",
+      "M": 1,
+      "N": 50,
+      "K": 320,
+      "abi": 1,
+      "tile_i": 1,
+      "tile_j": 4,
+      "tile_k": 20,
+      "block_m": 1,
+      "layout_flags": 0,
+      "forwarded_copies": 0
+    },
+    {
+      "event": "tile",
+      "function": "main_dispatch_2_conv_8x8x20x5x5x10_i8xi8xi32",
+      "M": 64,
+      "N": 20,
+      "K": 250,
+      "abi": 1,
+      "tile_i": 4,
+      "tile_j": 2,
+      "tile_k": 16,
+      "block_m": 64,
+      "layout_flags": 0,
+      "forwarded_copies": 0
+    },
+    {
+      "event": "layout",
+      "function": "main_dispatch_5_vecmat_10x50_i8xi8xi32",
+      "M": 1,
+      "N": 10,
+      "K": 50,
+      "abi": 1,
+      "tile_i": 1,
+      "tile_j": 1,
+      "tile_k": 4,
+      "block_m": 1,
+      "layout_flags": 7,
+      "forwarded_copies": 0
+    },
+    {
+      "event": "layout",
+      "function": "main_dispatch_4_vecmat_50x320_i8xi8xi32",
+      "M": 1,
+      "N": 50,
+      "K": 320,
+      "abi": 1,
+      "tile_i": 1,
+      "tile_j": 4,
+      "tile_k": 20,
+      "block_m": 1,
+      "layout_flags": 7,
+      "forwarded_copies": 0
+    },
+    {
+      "event": "layout",
+      "function": "main_dispatch_2_conv_8x8x20x5x5x10_i8xi8xi32",
+      "M": 64,
+      "N": 20,
+      "K": 250,
+      "abi": 1,
+      "tile_i": 4,
+      "tile_j": 2,
+      "tile_k": 16,
+      "block_m": 64,
+      "layout_flags": 7,
+      "forwarded_copies": 0
+    },
+    {
+      "event": "layout",
+      "function": "main_dispatch_0_conv_24x24x10x5x5_i8xi8xi32",
+      "M": 576,
+      "N": 10,
+      "K": 25,
+      "abi": 1,
+      "tile_i": 8,
+      "tile_j": 1,
+      "tile_k": 2,
+      "block_m": 128,
+      "layout_flags": 7,
+      "forwarded_copies": 0
+    }
+  ],
+  "fused_epilogues": [
+    {
+      "kind": "matmul",
+      "mult": 893155490,
+      "round": 137438953472,
+      "shift": 38,
+      "min": 0,
+      "max": 127,
+      "path": "exact_integer_ddr_tile"
+    },
+    {
+      "kind": "convolution",
+      "mult": 1057548113,
+      "round": 549755813888,
+      "shift": 40,
+      "min": -127,
+      "max": 127,
+      "path": "exact_integer_ddr_tile"
+    },
+    {
+      "kind": "convolution",
+      "mult": 759210391,
+      "round": 274877906944,
+      "shift": 39,
+      "min": -127,
+      "max": 127,
+      "path": "exact_integer_ddr_tile"
+    }
+  ],
+  "epilogue_path_counts": {
+    "exact_integer_ddr_tile": 3
+  },
+  "undefined_native_symbols": [
+    "                 U gemmini_conv2d_i8_requant_planned",
+    "                 U gemmini_matmul_i8_planned",
+    "                 U gemmini_matmul_i8_requant_planned"
+  ],
+  "artifact_hashes": {
+    "G_arm_gemmini/build/model/mnist/model.vmfb": "2f1539b3cae7a3f5c80b027db6613a61539e8bcee775da1f6bd4dbbdc6e984b4",
+    "G_arm_gemmini/build/model/mnist/model_lib.o": "f2a3672042c0aa0b5fe56d5f1d615fd90e0b14d252387540244812c8191f52d6",
+    "G_arm_gemmini/build/iree-firmware/mnist/host/host.elf": "68dee72bf1beded885f7cc29c850acf6b4796daa69eec4f9b8226d32d6349a53",
+    "G_arm_gemmini/build/iree-firmware/mnist/host/host.hex": "9b3d4a1848f67519ae76b09b52590998fe000bdc3448713a1e4e9f77bf97d8ea",
+    "G_arm_gemmini/build/iree-firmware/mnist/npu/npu.elf": "f9d9bcb665c7fe729a0b8cf050c33209606a8cf660ddcd8f7e41ee2226106c72",
+    "G_arm_gemmini/build/iree-firmware/mnist/loadmem.elf": "e23a192b54ef8bae547dd86fb3455b621c813a733b6d790aad733e40eb6bd3a6",
+    "G_arm_gemmini/artifacts/iree_mnist_timing.json": "c7755a348525f3154cf30478350927fbc3719873f78d43c510c7fd4c0a81b9d2",
+    "G_arm_gemmini/artifacts/iree_mnist_soc.log": "c90c4ffc3fd433b158dd3db72effe5f03082b7f17022a2572a90bbc4564811ba",
+    "G_arm_gemmini/artifacts/steps678_performance_comparison.json": "0f652bbf1342ded3ec7d8bd92145e54faf2a3bd94ad0650b1326b6275e0519bd"
+  },
+  "rtl_run": true,
+  "numerical_validation": true,
+  "speedup_measured": true,
+  "limitation": "General MNIST fixed-point requantize executes on Rocket over an int32 DDR tile. Hardware int8 mvout is restricted to identity scale plus supported saturation/ReLU. No RTL changes.",
+  "rtl_simulation": {
+    "date": "2026-10-28",
+    "result": "MNIST PASS (Arm IREE / Rocket / Gemmini)",
+    "predicted": 7,
+    "expected": 7,
+    "max_error_x1e6": 0,
+    "simulator_wall_seconds": 1014.054,
+    "baseline_wall_seconds": 1276.561,
+    "speedup_factor": 1.259,
+    "wall_time_reduction_percent": 20.56,
+    "dispatch": {
+      "dispatch_count": 8,
+      "workgroups": 34,
+      "slot_cycles": 856576,
+      "handler_cycles": 827478
+    },
+    "query": {
+      "query_count": 1,
+      "query_exports": 8,
+      "slot_cycles": 3774,
+      "handler_cycles": 2837
+    },
+    "baseline_dispatch": {
+      "dispatch_count": 108,
+      "workgroups": 134,
+      "slot_cycles": 973795,
+      "handler_cycles": 897653
+    },
+    "baseline_query": {
+      "query_count": 1,
+      "query_exports": 108,
+      "slot_cycles": 28495,
+      "handler_cycles": 27570
+    },
+    "waveform_dump": false,
+    "simulator_sha256": "71fae2a8415ebf0969d2029ff6c9805a9bc680acb2fcb469fe63cb5e5484da15",
+    "limitation": "Gemmini C wrapper counter is 0 for direct-linked native calls; no waveform was collected to measure Gemmini busy cycles directly."
+  }
+}

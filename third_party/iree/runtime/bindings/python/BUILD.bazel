@@ -1,0 +1,125 @@
+# Copyright 2026 The IREE Authors
+#
+# Licensed under the Apache License v2.0 with LLVM Exceptions.
+# See https://llvm.org/LICENSE.txt for license information.
+# SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+
+load("@rules_python//python:defs.bzl", "py_library", "py_test")
+load("//build_tools/bazel:iree_python.bzl", "iree_py_extension")
+
+package(
+    default_visibility = ["//visibility:public"],
+    licenses = ["notice"],  # Apache 2.0
+)
+
+iree_py_extension(
+    name = "_runtime",
+    srcs = [
+        "binding.h",
+        "buffer_interop.h",  # Included this in case it's needed, wait! Let's check if it was in the CMake source list.
+        "initialize_module.cc",
+        "invoke.cc",
+        "invoke.h",
+        "io.cc",
+        "io.h",
+        "hal.cc",
+        "hal.h",
+        "local_dlpack.h",
+        "loop.cc",
+        "loop.h",
+        "numpy_interop.cc",
+        "numpy_interop.h",
+        "py_module.cc",
+        "py_module.h",
+        "status_utils.cc",
+        "status_utils.h",
+        "vm.cc",
+        "vm.h",
+    ],
+    deps = [
+        "//runtime/src/iree/base",
+        "//runtime/src/iree/base/internal:path",
+        "//runtime/src/iree/base/tooling:flags",
+        "//runtime/src/iree/hal",
+        "//runtime/src/iree/hal/drivers",
+        "//runtime/src/iree/hal/utils:allocators",
+        "//runtime/src/iree/io:file_handle",
+        "//runtime/src/iree/io:parameter_index",
+        "//runtime/src/iree/io:parameter_index_provider",
+        "//runtime/src/iree/io:parameter_provider",
+        "//runtime/src/iree/io:scope_map",
+        "//runtime/src/iree/io/formats/irpa",
+        "//runtime/src/iree/io/formats:parser_registry",
+        "//runtime/src/iree/modules/hal",
+        "//runtime/src/iree/modules/hal:debugging",
+        "//runtime/src/iree/modules/hal:types",
+        "//runtime/src/iree/modules/io/parameters",
+        "//runtime/src/iree/schemas:parameter_archive",
+        "//runtime/src/iree/tooling:device_util",
+        "//runtime/src/iree/tooling/modules",
+        "//runtime/src/iree/vm",
+        "//runtime/src/iree/vm/bytecode:module",
+        "@numpy_configure//:numpy_headers",
+    ],
+)
+
+genrule(
+    name = "copy_runtime_libs",
+    srcs = [
+        ":_runtime.so",
+        "//tools:iree-run-module",
+        "//tools:iree-cpuinfo",
+        "//tools:iree-benchmark-executable",
+        "//tools:iree-benchmark-module",
+        "//tools:iree-convert-parameters",
+        "//tools:iree-create-parameters",
+        "//tools:iree-dump-module",
+        "//tools:iree-dump-parameters",
+        "//build_tools/embed_data:iree-c-embed-data",
+        "@com_github_dvidelabs_flatcc//:flatcc",
+    ],
+    outs = [
+        "iree/_runtime_libs/_runtime.so",
+        "iree/_runtime_libs/iree-run-module",
+        "iree/_runtime_libs/iree-cpuinfo",
+        "iree/_runtime_libs/iree-benchmark-executable",
+        "iree/_runtime_libs/iree-benchmark-module",
+        "iree/_runtime_libs/iree-convert-parameters",
+        "iree/_runtime_libs/iree-create-parameters",
+        "iree/_runtime_libs/iree-dump-module",
+        "iree/_runtime_libs/iree-dump-parameters",
+        "iree/_runtime_libs/iree-c-embed-data",
+        "iree/_runtime_libs/iree-flatcc-cli",
+        "iree/_runtime_libs/__init__.py",
+    ],
+    cmd = """
+        cp $(location :_runtime.so) $(location iree/_runtime_libs/_runtime.so)
+        cp $(location //tools:iree-run-module) $(location iree/_runtime_libs/iree-run-module)
+        cp $(location //tools:iree-cpuinfo) $(location iree/_runtime_libs/iree-cpuinfo)
+        cp $(location //tools:iree-benchmark-executable) $(location iree/_runtime_libs/iree-benchmark-executable)
+        cp $(location //tools:iree-benchmark-module) $(location iree/_runtime_libs/iree-benchmark-module)
+        cp $(location //tools:iree-convert-parameters) $(location iree/_runtime_libs/iree-convert-parameters)
+        cp $(location //tools:iree-create-parameters) $(location iree/_runtime_libs/iree-create-parameters)
+        cp $(location //tools:iree-dump-module) $(location iree/_runtime_libs/iree-dump-module)
+        cp $(location //tools:iree-dump-parameters) $(location iree/_runtime_libs/iree-dump-parameters)
+        cp $(location //build_tools/embed_data:iree-c-embed-data) $(location iree/_runtime_libs/iree-c-embed-data)
+        cp $(location @com_github_dvidelabs_flatcc//:flatcc) $(location iree/_runtime_libs/iree-flatcc-cli)
+        touch $(location iree/_runtime_libs/__init__.py)
+    """,
+)
+
+py_library(
+    name = "runtime",
+    srcs = glob([
+        "iree/runtime/**/*.py",
+        "iree/_runtime/**/*.py",
+    ]),
+    data = [":copy_runtime_libs"] + glob(["iree/runtime/**/*.pyi"]),
+    imports = ["."],
+    deps = [
+        "@pip//ml_dtypes",
+        "@pip//numpy",
+    ],
+)
+
+exports_files(glob(["tests/**/*.py"]))

@@ -1,0 +1,7 @@
+# Only generated outputs are ignored. All required vendored files are tracked.
+/build/
+/G_arm_gemmini/build/
+/G_arm_gemmini/runtime/lib/
+/F_gemmini_backend/runtime/lib/
+**/__pycache__/
+*.pyc

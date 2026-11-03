@@ -1,0 +1,12 @@
+{
+  "repository": "https://github.com/risclite/ARM9-compatible-soft-CPU-core",
+  "commit": "fc17416644f6021e99c41e81faad1135609a3036",
+  "license": "Apache-2.0",
+  "upstream_path": "RTL/arm9_compatiable_code.v",
+  "retrieved_date": "2026-10-23",
+  "files": {
+    "arm9_compatiable_code.v": "c7ca83154c12722316f31400d92de00e04a6f4ae8110e16c05e8849ec428fe15",
+    "README.upstream.md": "d8f1c336b45dfc6516da3f3be23b2674c11e747f1dd62190cb6e9a894bd1532b",
+    "LICENSE": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+  }
+}

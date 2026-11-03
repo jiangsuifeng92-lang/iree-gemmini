@@ -1,0 +1,100 @@
+// Copyright 2026 The IREE Authors
+//
+// Licensed under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+
+#include "iree/compiler/Codegen/Utils/CodegenOptions.h"
+
+IREE_DEFINE_COMPILER_OPTION_FLAGS(mlir::iree_compiler::CPUCodegenOptions);
+IREE_DEFINE_COMPILER_OPTION_FLAGS(mlir::iree_compiler::GPUCodegenOptions);
+
+namespace mlir::iree_compiler {
+
+std::string CodegenOptions::tuningSpecPath = "";
+bool CodegenOptions::setTunerAttributes = false;
+
+void CodegenOptions::bindOptions(OptionsBinder &binder) {
+  static llvm::cl::OptionCategory category("IREE Codegen Options");
+
+  binder.opt<std::string>(
+      "iree-codegen-tuning-spec-path", tuningSpecPath, llvm::cl::cat(category),
+      llvm::cl::desc("Path to a module containing a tuning spec (transform "
+                     "dialect library). Accepts MLIR text (.mlir) and "
+                     "bytecode (.mlirbc) formats."));
+
+  binder.opt<bool>("iree-codegen-add-tuner-attributes", setTunerAttributes,
+                   llvm::cl::cat(category),
+                   llvm::cl::desc("Adds attribute for tuner."));
+
+  // Deprecated alias for the old spelling.
+  binder.opt<bool>(
+      "iree-config-add-tuner-attributes", setTunerAttributes,
+      Deprecated("use --iree-codegen-add-tuner-attributes instead"),
+      llvm::cl::Hidden, llvm::cl::desc("Adds attribute for tuner."),
+      llvm::cl::cat(category));
+}
+
+void CPUCodegenOptions::bindOptions(OptionsBinder &binder) {
+  static llvm::cl::OptionCategory category("IREE CPU Codegen Options");
+  CodegenOptions::bindOptions(binder);
+
+  auto initAtOpt = binder.optimizationLevel(
+      "iree-llvmcpu-mlir-opt-level", optLevel,
+      llvm::cl::desc("Optimization level for MLIR codegen passes."),
+      llvm::cl::cat(category));
+
+  binder.opt<bool>("iree-llvmcpu-disable-distribution", disableDistribution,
+                   llvm::cl::desc("Disable thread distribution in codegen."),
+                   llvm::cl::cat(category));
+
+  binder.opt<bool>(
+      "iree-llvmcpu-fail-on-out-of-bounds-stack-allocation",
+      failOnOutOfBoundsStackAllocation,
+      llvm::cl::desc("Fail if the upper bound of dynamic stack allocation "
+                     "cannot be solved."),
+      llvm::cl::cat(category));
+
+  binder.opt<bool>("iree-llvmcpu-reassociate-fp-reductions",
+                   reassociateFpReductions,
+                   {initAtOpt(llvm::OptimizationLevel::O0, false),
+                    initAtOpt(llvm::OptimizationLevel::O2, true)},
+                   llvm::cl::desc("Enables reassociation for FP reductions."),
+                   llvm::cl::cat(category));
+
+  binder.opt<bool>(
+      "iree-llvmcpu-use-fast-min-max-ops", useFastMinMaxOps,
+      llvm::cl::desc(
+          "Use `arith.minf/maxf` instead of `arith.minimumf/maximumf` ops."),
+      llvm::cl::cat(category));
+
+  binder.opt<bool>(
+      "iree-llvmcpu-skip-intermediate-roundings", skipIntermediateRoundings,
+      llvm::cl::desc(
+          "Allow skipping intermediate roundings. For example, in f16 matmul "
+          "kernels on targets with only f32 arithmetic, we have to perform "
+          "each multiply-accumulate in f32, and if this flag is false, then "
+          "we have to round those f32 accumulators to the nearest f16 every "
+          "time, which is slow."),
+      llvm::cl::cat(category));
+
+  binder.opt<bool>(
+      "iree-llvmcpu-use-decompose-softmax-fuse", useSoftmaxInterFusion,
+      llvm::cl::desc(
+          "Enables inter-pass fusion for the DecomposeSoftmax pass."),
+      llvm::cl::cat(category));
+
+  binder.opt<bool>(
+      "iree-llvmcpu-instrument-memory-accesses", instrumentMemoryAccesses,
+      llvm::cl::desc(
+          "Instruments memory reads and writes in dispatches for address "
+          "tracking. Use with --iree-hal-instrument-dispatches=<buffer-size> "
+          "and analyze results with iree-dump-instruments."),
+      llvm::cl::cat(category));
+}
+
+void GPUCodegenOptions::bindOptions(OptionsBinder &binder) {
+  CodegenOptions::bindOptions(binder);
+}
+
+} // namespace mlir::iree_compiler

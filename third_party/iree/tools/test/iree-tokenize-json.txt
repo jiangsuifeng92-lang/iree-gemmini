@@ -1,0 +1,48 @@
+// RUN: iree-tokenize --tokenizer=%p/iree-tokenize.json "hello world" | \
+// RUN:   FileCheck %s --check-prefix=BASIC
+// RUN: iree-tokenize --tokenizer=%p/iree-tokenize.json --special=false "hello" | \
+// RUN:   FileCheck %s --check-prefix=NOSPEC
+// RUN: iree-tokenize --tokenizer=%p/iree-tokenize.json --info | \
+// RUN:   FileCheck %s --check-prefix=INFO
+// RUN: iree-tokenize --tokenizer=%p/iree-tokenize.json --decode "0,19,21,1" | \
+// RUN:   FileCheck %s --check-prefix=DECODE
+// RUN: iree-tokenize --tokenizer=%p/iree-tokenize.json --decode --decode_special "0,19,21,1" | \
+// RUN:   FileCheck %s --check-prefix=DECODE-SPECIAL
+// RUN: iree-tokenize --tokenizer=%p/iree-tokenize.json --json "hello world" | \
+// RUN:   FileCheck %s --check-prefix=JSON
+// RUN: iree-tokenize --tokenizer=%p/iree-tokenize.json --json --special=false "hello" | \
+// RUN:   FileCheck %s --check-prefix=JSON-NOSPEC
+// RUN: iree-tokenize --tokenizer=%p/iree-tokenize.json --offsets "hello world" | \
+// RUN:   FileCheck %s --check-prefix=OFFSETS
+// RUN: iree-tokenize --tokenizer=%p/iree-tokenize.json --offsets --json "hello world" | \
+// RUN:   FileCheck %s --check-prefix=OFFSETS-JSON
+
+// Basic encoding with special tokens (BPE: <s> hello Ġworld </s>).
+// BASIC: 0,19,21,1
+
+// Encoding without special tokens (BPE: hello).
+// NOSPEC: 19
+
+// Tokenizer info (always JSON).
+// INFO: "vocab_size":22
+// INFO: "model_type":"BPE"
+// INFO: "merge_count":9
+
+// Decoding back to text (default: skip special tokens).
+// DECODE: hello world
+
+// Decoding with special tokens included (--decode_special).
+// DECODE-SPECIAL: <s>hello world</s>
+
+// JSON output with --json flag.
+// JSON: {"ids":[0,19,21,1]}
+
+// JSON output without special tokens.
+// JSON-NOSPEC: {"ids":[19]}
+
+// Offsets: special tokens get [0:0], model tokens get byte ranges.
+// OFFSETS: 0[0:0],19[0:5],21[5:11],1[0:0]
+
+// JSON offsets output (split to avoid FileCheck [[regex-var]] parsing).
+// OFFSETS-JSON: {"ids":[0,19,21,1],"offsets":[
+// OFFSETS-JSON-SAME: [0,0],[0,5],[5,11],[0,0]]}

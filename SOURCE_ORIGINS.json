@@ -1,0 +1,431 @@
+{
+  "copies": [
+    {
+      "destination": "F_gemmini_backend/compiler",
+      "source": "/home/aiden/iree_rocket_gemmini/H_arm_gemmini_compiler_opt/F_gemmini_backend/compiler",
+      "excluded": []
+    },
+    {
+      "destination": "F_gemmini_backend/build_tools",
+      "source": "/home/aiden/iree_rocket_gemmini/H_arm_gemmini_compiler_opt/F_gemmini_backend/build_tools",
+      "excluded": []
+    },
+    {
+      "destination": "F_gemmini_backend/kernels",
+      "source": "/home/aiden/iree_rocket_gemmini/H_arm_gemmini_compiler_opt/F_gemmini_backend/kernels",
+      "excluded": []
+    },
+    {
+      "destination": "F_gemmini_backend/runtime",
+      "source": "/home/aiden/iree_rocket_gemmini/H_arm_gemmini_compiler_opt/F_gemmini_backend/runtime",
+      "excluded": [
+        "lib"
+      ]
+    },
+    {
+      "destination": "F_gemmini_backend/apps/mnist",
+      "source": "/home/aiden/iree_rocket_gemmini/H_arm_gemmini_compiler_opt/F_gemmini_backend/apps/mnist",
+      "excluded": []
+    },
+    {
+      "destination": "F_gemmini_backend/CMakeLists.txt",
+      "source": "/home/aiden/iree_rocket_gemmini/H_arm_gemmini_compiler_opt/F_gemmini_backend/CMakeLists.txt",
+      "excluded": []
+    },
+    {
+      "destination": "G_arm_gemmini/firmware",
+      "source": "/home/aiden/iree_rocket_gemmini/H_arm_gemmini_compiler_opt/G_arm_gemmini/firmware",
+      "excluded": []
+    },
+    {
+      "destination": "G_arm_gemmini/include",
+      "source": "/home/aiden/iree_rocket_gemmini/H_arm_gemmini_compiler_opt/G_arm_gemmini/include",
+      "excluded": []
+    },
+    {
+      "destination": "G_arm_gemmini/models",
+      "source": "/home/aiden/iree_rocket_gemmini/H_arm_gemmini_compiler_opt/G_arm_gemmini/models",
+      "excluded": []
+    },
+    {
+      "destination": "G_arm_gemmini/cmake",
+      "source": "/home/aiden/iree_rocket_gemmini/H_arm_gemmini_compiler_opt/G_arm_gemmini/cmake",
+      "excluded": []
+    },
+    {
+      "destination": "G_arm_gemmini/hardware",
+      "source": "/home/aiden/iree_rocket_gemmini/H_arm_gemmini_compiler_opt/G_arm_gemmini/hardware",
+      "excluded": []
+    },
+    {
+      "destination": "G_arm_gemmini/rtl",
+      "source": "/home/aiden/iree_rocket_gemmini/H_arm_gemmini_compiler_opt/G_arm_gemmini/rtl",
+      "excluded": []
+    },
+    {
+      "destination": "G_arm_gemmini/sim",
+      "source": "/home/aiden/iree_rocket_gemmini/H_arm_gemmini_compiler_opt/G_arm_gemmini/sim",
+      "excluded": []
+    },
+    {
+      "destination": "G_arm_gemmini/runtime/armv4",
+      "source": "/home/aiden/iree_rocket_gemmini/H_arm_gemmini_compiler_opt/G_arm_gemmini/runtime/armv4",
+      "excluded": []
+    },
+    {
+      "destination": "G_arm_gemmini/third_party/arm9",
+      "source": "/home/aiden/iree_rocket_gemmini/H_arm_gemmini_compiler_opt/G_arm_gemmini/third_party/arm9",
+      "excluded": []
+    },
+    {
+      "destination": "G_arm_gemmini/scripts/prepare_model.py",
+      "source": "/home/aiden/iree_rocket_gemmini/H_arm_gemmini_compiler_opt/G_arm_gemmini/scripts/prepare_model.py",
+      "excluded": []
+    },
+    {
+      "destination": "G_arm_gemmini/scripts/stage_iree.py",
+      "source": "/home/aiden/iree_rocket_gemmini/H_arm_gemmini_compiler_opt/G_arm_gemmini/scripts/stage_iree.py",
+      "excluded": []
+    },
+    {
+      "destination": "G_arm_gemmini/scripts/merge_runtime.py",
+      "source": "/home/aiden/iree_rocket_gemmini/H_arm_gemmini_compiler_opt/G_arm_gemmini/scripts/merge_runtime.py",
+      "excluded": []
+    },
+    {
+      "destination": "G_arm_gemmini/scripts/bin_to_hex.py",
+      "source": "/home/aiden/iree_rocket_gemmini/H_arm_gemmini_compiler_opt/G_arm_gemmini/scripts/bin_to_hex.py",
+      "excluded": []
+    },
+    {
+      "destination": "G_arm_gemmini/scripts/make_load_image.py",
+      "source": "/home/aiden/iree_rocket_gemmini/H_arm_gemmini_compiler_opt/G_arm_gemmini/scripts/make_load_image.py",
+      "excluded": []
+    },
+    {
+      "destination": "G_arm_gemmini/scripts/compile_model.sh",
+      "source": "/home/aiden/iree_rocket_gemmini/H_arm_gemmini_compiler_opt/G_arm_gemmini/scripts/compile_model.sh",
+      "excluded": []
+    },
+    {
+      "destination": "G_arm_gemmini/scripts/build_arm_runtime.sh",
+      "source": "/home/aiden/iree_rocket_gemmini/H_arm_gemmini_compiler_opt/G_arm_gemmini/scripts/build_arm_runtime.sh",
+      "excluded": []
+    },
+    {
+      "destination": "G_arm_gemmini/scripts/build_iree_firmware.sh",
+      "source": "/home/aiden/iree_rocket_gemmini/H_arm_gemmini_compiler_opt/G_arm_gemmini/scripts/build_iree_firmware.sh",
+      "excluded": []
+    },
+    {
+      "destination": "G_arm_gemmini/scripts/run_timed_sim.py",
+      "source": "/home/aiden/iree_rocket_gemmini/H_arm_gemmini_compiler_opt/G_arm_gemmini/scripts/run_timed_sim.py",
+      "excluded": []
+    },
+    {
+      "destination": "config",
+      "source": "/home/aiden/iree_rocket_gemmini/H_arm_gemmini_compiler_opt/config",
+      "excluded": []
+    },
+    {
+      "destination": "include",
+      "source": "/home/aiden/iree_rocket_gemmini/H_arm_gemmini_compiler_opt/include",
+      "excluded": []
+    },
+    {
+      "destination": "docs",
+      "source": "/home/aiden/iree_rocket_gemmini/H_arm_gemmini_compiler_opt/docs",
+      "excluded": []
+    },
+    {
+      "destination": "scripts/generate_config.py",
+      "source": "/home/aiden/iree_rocket_gemmini/H_arm_gemmini_compiler_opt/scripts/generate_config.py",
+      "excluded": []
+    },
+    {
+      "destination": "reference/steps678_status.json",
+      "source": "/home/aiden/iree_rocket_gemmini/H_arm_gemmini_compiler_opt/artifacts/steps678_status.json",
+      "excluded": []
+    },
+    {
+      "destination": "reference/iree_mnist_soc.log",
+      "source": "/home/aiden/iree_rocket_gemmini/H_arm_gemmini_compiler_opt/G_arm_gemmini/artifacts/iree_mnist_soc.log",
+      "excluded": []
+    },
+    {
+      "destination": "reference/iree_mnist_timing.json",
+      "source": "/home/aiden/iree_rocket_gemmini/H_arm_gemmini_compiler_opt/G_arm_gemmini/artifacts/iree_mnist_timing.json",
+      "excluded": []
+    },
+    {
+      "destination": "reference/steps678_performance_comparison.json",
+      "source": "/home/aiden/iree_rocket_gemmini/H_arm_gemmini_compiler_opt/G_arm_gemmini/artifacts/steps678_performance_comparison.json",
+      "excluded": []
+    },
+    {
+      "destination": "reference/steps678_performance_comparison.md",
+      "source": "/home/aiden/iree_rocket_gemmini/H_arm_gemmini_compiler_opt/G_arm_gemmini/artifacts/steps678_performance_comparison.md",
+      "excluded": []
+    },
+    {
+      "destination": "third_party/iree",
+      "source": "/home/aiden/iree_rocket_gemmini/H_arm_gemmini_compiler_opt/F_gemmini_backend/toolchain/iree-src/iree",
+      "excluded": [
+        "third_party/llvm-project",
+        "third_party/torch-mlir/externals/llvm-project"
+      ]
+    },
+    {
+      "destination": "third_party/llvm-project",
+      "source": "/home/aiden/iree_rocket_gemmini/H_arm_gemmini_compiler_opt/F_gemmini_backend/toolchain/iree-src/llvm-project",
+      "excluded": []
+    },
+    {
+      "destination": "third_party/riscv-isa-sim",
+      "source": "/home/aiden/chipyard/toolchains/riscv-tools/riscv-isa-sim",
+      "excluded": [
+        "build"
+      ]
+    },
+    {
+      "destination": "third_party/DRAMSim2",
+      "source": "/home/aiden/chipyard/tools/DRAMSim2",
+      "excluded": [
+        "traces"
+      ]
+    },
+    {
+      "destination": "F_gemmini_backend/toolchain/riscv/lib",
+      "source": "/home/aiden/iree_rocket_gemmini/H_arm_gemmini_compiler_opt/F_gemmini_backend/toolchain/riscv/lib",
+      "excluded": []
+    },
+    {
+      "destination": "F_gemmini_backend/toolchain/riscv/libexec",
+      "source": "/home/aiden/iree_rocket_gemmini/H_arm_gemmini_compiler_opt/F_gemmini_backend/toolchain/riscv/libexec",
+      "excluded": []
+    },
+    {
+      "destination": "F_gemmini_backend/toolchain/riscv/riscv64-unknown-elf",
+      "source": "/home/aiden/iree_rocket_gemmini/H_arm_gemmini_compiler_opt/F_gemmini_backend/toolchain/riscv/riscv64-unknown-elf",
+      "excluded": []
+    },
+    {
+      "destination": "F_gemmini_backend/toolchain/riscv/bin/riscv64-unknown-elf-strings",
+      "source": "/home/aiden/iree_rocket_gemmini/H_arm_gemmini_compiler_opt/F_gemmini_backend/toolchain/riscv/bin/riscv64-unknown-elf-strings",
+      "excluded": []
+    },
+    {
+      "destination": "F_gemmini_backend/toolchain/riscv/bin/riscv64-unknown-elf-c++filt",
+      "source": "/home/aiden/iree_rocket_gemmini/H_arm_gemmini_compiler_opt/F_gemmini_backend/toolchain/riscv/bin/riscv64-unknown-elf-c++filt",
+      "excluded": []
+    },
+    {
+      "destination": "F_gemmini_backend/toolchain/riscv/bin/riscv64-unknown-elf-objcopy",
+      "source": "/home/aiden/iree_rocket_gemmini/H_arm_gemmini_compiler_opt/F_gemmini_backend/toolchain/riscv/bin/riscv64-unknown-elf-objcopy",
+      "excluded": []
+    },
+    {
+      "destination": "F_gemmini_backend/toolchain/riscv/bin/riscv64-unknown-elf-ranlib",
+      "source": "/home/aiden/iree_rocket_gemmini/H_arm_gemmini_compiler_opt/F_gemmini_backend/toolchain/riscv/bin/riscv64-unknown-elf-ranlib",
+      "excluded": []
+    },
+    {
+      "destination": "F_gemmini_backend/toolchain/riscv/bin/riscv64-unknown-elf-ld.bfd",
+      "source": "/home/aiden/iree_rocket_gemmini/H_arm_gemmini_compiler_opt/F_gemmini_backend/toolchain/riscv/bin/riscv64-unknown-elf-ld.bfd",
+      "excluded": []
+    },
+    {
+      "destination": "F_gemmini_backend/toolchain/riscv/bin/riscv64-unknown-elf-gcc-ranlib",
+      "source": "/home/aiden/iree_rocket_gemmini/H_arm_gemmini_compiler_opt/F_gemmini_backend/toolchain/riscv/bin/riscv64-unknown-elf-gcc-ranlib",
+      "excluded": []
+    },
+    {
+      "destination": "F_gemmini_backend/toolchain/riscv/bin/riscv64-unknown-elf-c++",
+      "source": "/home/aiden/iree_rocket_gemmini/H_arm_gemmini_compiler_opt/F_gemmini_backend/toolchain/riscv/bin/riscv64-unknown-elf-c++",
+      "excluded": []
+    },
+    {
+      "destination": "F_gemmini_backend/toolchain/riscv/bin/riscv64-unknown-elf-ar",
+      "source": "/home/aiden/iree_rocket_gemmini/H_arm_gemmini_compiler_opt/F_gemmini_backend/toolchain/riscv/bin/riscv64-unknown-elf-ar",
+      "excluded": []
+    },
+    {
+      "destination": "F_gemmini_backend/toolchain/riscv/bin/riscv64-unknown-elf-readelf",
+      "source": "/home/aiden/iree_rocket_gemmini/H_arm_gemmini_compiler_opt/F_gemmini_backend/toolchain/riscv/bin/riscv64-unknown-elf-readelf",
+      "excluded": []
+    },
+    {
+      "destination": "F_gemmini_backend/toolchain/riscv/bin/riscv64-unknown-elf-objdump",
+      "source": "/home/aiden/iree_rocket_gemmini/H_arm_gemmini_compiler_opt/F_gemmini_backend/toolchain/riscv/bin/riscv64-unknown-elf-objdump",
+      "excluded": []
+    },
+    {
+      "destination": "F_gemmini_backend/toolchain/riscv/bin/riscv64-unknown-elf-elfedit",
+      "source": "/home/aiden/iree_rocket_gemmini/H_arm_gemmini_compiler_opt/F_gemmini_backend/toolchain/riscv/bin/riscv64-unknown-elf-elfedit",
+      "excluded": []
+    },
+    {
+      "destination": "F_gemmini_backend/toolchain/riscv/bin/riscv64-unknown-elf-strip",
+      "source": "/home/aiden/iree_rocket_gemmini/H_arm_gemmini_compiler_opt/F_gemmini_backend/toolchain/riscv/bin/riscv64-unknown-elf-strip",
+      "excluded": []
+    },
+    {
+      "destination": "F_gemmini_backend/toolchain/riscv/bin/riscv64-unknown-elf-gcov-dump",
+      "source": "/home/aiden/iree_rocket_gemmini/H_arm_gemmini_compiler_opt/F_gemmini_backend/toolchain/riscv/bin/riscv64-unknown-elf-gcov-dump",
+      "excluded": []
+    },
+    {
+      "destination": "F_gemmini_backend/toolchain/riscv/bin/riscv64-unknown-elf-as",
+      "source": "/home/aiden/iree_rocket_gemmini/H_arm_gemmini_compiler_opt/F_gemmini_backend/toolchain/riscv/bin/riscv64-unknown-elf-as",
+      "excluded": []
+    },
+    {
+      "destination": "F_gemmini_backend/toolchain/riscv/bin/riscv64-unknown-elf-lto-dump",
+      "source": "/home/aiden/iree_rocket_gemmini/H_arm_gemmini_compiler_opt/F_gemmini_backend/toolchain/riscv/bin/riscv64-unknown-elf-lto-dump",
+      "excluded": []
+    },
+    {
+      "destination": "F_gemmini_backend/toolchain/riscv/bin/riscv64-unknown-elf-gcc-13.2.0",
+      "source": "/home/aiden/iree_rocket_gemmini/H_arm_gemmini_compiler_opt/F_gemmini_backend/toolchain/riscv/bin/riscv64-unknown-elf-gcc-13.2.0",
+      "excluded": []
+    },
+    {
+      "destination": "F_gemmini_backend/toolchain/riscv/bin/riscv64-unknown-elf-addr2line",
+      "source": "/home/aiden/iree_rocket_gemmini/H_arm_gemmini_compiler_opt/F_gemmini_backend/toolchain/riscv/bin/riscv64-unknown-elf-addr2line",
+      "excluded": []
+    },
+    {
+      "destination": "F_gemmini_backend/toolchain/riscv/bin/riscv64-unknown-elf-g++",
+      "source": "/home/aiden/iree_rocket_gemmini/H_arm_gemmini_compiler_opt/F_gemmini_backend/toolchain/riscv/bin/riscv64-unknown-elf-g++",
+      "excluded": []
+    },
+    {
+      "destination": "F_gemmini_backend/toolchain/riscv/bin/riscv64-unknown-elf-size",
+      "source": "/home/aiden/iree_rocket_gemmini/H_arm_gemmini_compiler_opt/F_gemmini_backend/toolchain/riscv/bin/riscv64-unknown-elf-size",
+      "excluded": []
+    },
+    {
+      "destination": "F_gemmini_backend/toolchain/riscv/bin/riscv64-unknown-elf-nm",
+      "source": "/home/aiden/iree_rocket_gemmini/H_arm_gemmini_compiler_opt/F_gemmini_backend/toolchain/riscv/bin/riscv64-unknown-elf-nm",
+      "excluded": []
+    },
+    {
+      "destination": "F_gemmini_backend/toolchain/riscv/bin/riscv64-unknown-elf-cpp",
+      "source": "/home/aiden/iree_rocket_gemmini/H_arm_gemmini_compiler_opt/F_gemmini_backend/toolchain/riscv/bin/riscv64-unknown-elf-cpp",
+      "excluded": []
+    },
+    {
+      "destination": "F_gemmini_backend/toolchain/riscv/bin/riscv64-unknown-elf-gcc",
+      "source": "/home/aiden/iree_rocket_gemmini/H_arm_gemmini_compiler_opt/F_gemmini_backend/toolchain/riscv/bin/riscv64-unknown-elf-gcc",
+      "excluded": []
+    },
+    {
+      "destination": "F_gemmini_backend/toolchain/riscv/bin/riscv64-unknown-elf-ld",
+      "source": "/home/aiden/iree_rocket_gemmini/H_arm_gemmini_compiler_opt/F_gemmini_backend/toolchain/riscv/bin/riscv64-unknown-elf-ld",
+      "excluded": []
+    },
+    {
+      "destination": "F_gemmini_backend/toolchain/riscv/bin/riscv64-unknown-elf-gcc-nm",
+      "source": "/home/aiden/iree_rocket_gemmini/H_arm_gemmini_compiler_opt/F_gemmini_backend/toolchain/riscv/bin/riscv64-unknown-elf-gcc-nm",
+      "excluded": []
+    },
+    {
+      "destination": "F_gemmini_backend/toolchain/riscv/bin/riscv64-unknown-elf-gcc-ar",
+      "source": "/home/aiden/iree_rocket_gemmini/H_arm_gemmini_compiler_opt/F_gemmini_backend/toolchain/riscv/bin/riscv64-unknown-elf-gcc-ar",
+      "excluded": []
+    },
+    {
+      "destination": "F_gemmini_backend/toolchain/riscv/bin/riscv64-unknown-elf-gcov-tool",
+      "source": "/home/aiden/iree_rocket_gemmini/H_arm_gemmini_compiler_opt/F_gemmini_backend/toolchain/riscv/bin/riscv64-unknown-elf-gcov-tool",
+      "excluded": []
+    },
+    {
+      "destination": "F_gemmini_backend/toolchain/riscv/bin/riscv64-unknown-elf-gcov",
+      "source": "/home/aiden/iree_rocket_gemmini/H_arm_gemmini_compiler_opt/F_gemmini_backend/toolchain/riscv/bin/riscv64-unknown-elf-gcov",
+      "excluded": []
+    },
+    {
+      "destination": "G_arm_gemmini/toolchain/sysroot/usr/include/newlib",
+      "source": "/home/aiden/iree_rocket_gemmini/H_arm_gemmini_compiler_opt/G_arm_gemmini/toolchain/sysroot/usr/include/newlib",
+      "excluded": []
+    },
+    {
+      "destination": "G_arm_gemmini/toolchain/sysroot/usr/lib/arm-none-eabi/newlib/libc.a",
+      "source": "/home/aiden/iree_rocket_gemmini/H_arm_gemmini_compiler_opt/G_arm_gemmini/toolchain/sysroot/usr/lib/arm-none-eabi/newlib/libc.a",
+      "excluded": []
+    },
+    {
+      "destination": "G_arm_gemmini/toolchain/sysroot/usr/lib/arm-none-eabi/newlib/libm.a",
+      "source": "/home/aiden/iree_rocket_gemmini/H_arm_gemmini_compiler_opt/G_arm_gemmini/toolchain/sysroot/usr/lib/arm-none-eabi/newlib/libm.a",
+      "excluded": []
+    },
+    {
+      "destination": "G_arm_gemmini/toolchain/sysroot/usr/lib/gcc/arm-none-eabi/13.2.1/libgcc.a",
+      "source": "/home/aiden/iree_rocket_gemmini/H_arm_gemmini_compiler_opt/G_arm_gemmini/toolchain/sysroot/usr/lib/gcc/arm-none-eabi/13.2.1/libgcc.a",
+      "excluded": []
+    },
+    {
+      "destination": "rtl/bootrom.rv32.img",
+      "source": "/home/aiden/chipyard/sims/verilator/generated-src/chipyard.harness.TestHarness.ArmGemminiConfig/bootrom.rv32.img",
+      "excluded": []
+    },
+    {
+      "destination": "rtl/bootrom.rv64.img",
+      "source": "/home/aiden/chipyard/sims/verilator/generated-src/chipyard.harness.TestHarness.ArmGemminiConfig/bootrom.rv64.img",
+      "excluded": []
+    },
+    {
+      "destination": "rtl/metadata/memmap.json",
+      "source": "/home/aiden/chipyard/sims/verilator/generated-src/chipyard.harness.TestHarness.ArmGemminiConfig/chipyard.harness.TestHarness.ArmGemminiConfig.memmap.json",
+      "excluded": []
+    },
+    {
+      "destination": "rtl/metadata/dts",
+      "source": "/home/aiden/chipyard/sims/verilator/generated-src/chipyard.harness.TestHarness.ArmGemminiConfig/chipyard.harness.TestHarness.ArmGemminiConfig.dts",
+      "excluded": []
+    },
+    {
+      "destination": "rtl/metadata/json",
+      "source": "/home/aiden/chipyard/sims/verilator/generated-src/chipyard.harness.TestHarness.ArmGemminiConfig/chipyard.harness.TestHarness.ArmGemminiConfig.json",
+      "excluded": []
+    },
+    {
+      "destination": "licenses/chipyard-LICENSE",
+      "source": "/home/aiden/chipyard/LICENSE",
+      "excluded": []
+    },
+    {
+      "destination": "licenses/gemmini-LICENSE",
+      "source": "/home/aiden/chipyard/generators/gemmini/LICENSE",
+      "excluded": []
+    },
+    {
+      "destination": "licenses/testchipip-LICENSE",
+      "source": "/home/aiden/chipyard/generators/testchipip/LICENSE",
+      "excluded": []
+    },
+    {
+      "source": "/home/aiden/chipyard/sims/verilator/generated-src/chipyard.harness.TestHarness.ArmGemminiConfig/gen-collateral/chipyard.harness.TestHarness.ArmGemminiConfig.model.mems.v",
+      "destination": "rtl/chipyard.harness.TestHarness.ArmGemminiConfig.model.mems.v",
+      "excluded": []
+    },
+    {
+      "source": "/home/aiden/chipyard/sims/verilator/generated-src/chipyard.harness.TestHarness.ArmGemminiConfig/gen-collateral/chipyard.harness.TestHarness.ArmGemminiConfig.top.mems.v",
+      "destination": "rtl/chipyard.harness.TestHarness.ArmGemminiConfig.top.mems.v",
+      "excluded": []
+    },
+    {
+      "source": "Chipyard matched GCC 13.2.0 cc1plus",
+      "destination": "F_gemmini_backend/toolchain/riscv/libexec/gcc/riscv64-unknown-elf/13.2.0/cc1plus",
+      "excluded": []
+    },
+    {
+      "source": "Chipyard Conda libfl.so.2 (dereferenced)",
+      "destination": "F_gemmini_backend/toolchain/riscv/lib/libfl.so.2",
+      "excluded": []
+    }
+  ],
+  "omitted_fixtures": [],
+  "policy": "Actual regular files; no symlinks, gitlinks, nested Git metadata or previous CMake build caches.",
+  "selection": "H steps 6/7/8, 8 exports, validated MNIST RTL 2026-10-28"
+}

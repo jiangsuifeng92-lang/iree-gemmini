@@ -1,0 +1,82 @@
+# yamllint disable rule:line-length
+name: CI
+
+on:
+  workflow_dispatch:
+  workflow_call:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+concurrency:
+  # A PR number if a pull request and otherwise the commit hash. This cancels
+  # queued and in-progress runs for the same PR (presubmit) or commit
+  # (postsubmit).
+  group: ci-build-test-cpp-linux-${{ github.event.number || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  build-test-linux:
+    strategy:
+      fail-fast: true
+      matrix:
+        torch-version: [nightly, stable]
+
+    name: Build and Test (Linux, torch-${{ matrix.torch-version }}, assertions)
+    runs-on: torch-mlir-cpubuilder-linux-x86-64-scale
+    env:
+      CACHE_DIR: ${{ github.workspace }}/.container-cache
+    steps:
+      - name: "Checking out repository"
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          submodules: true
+
+      - name: Enable cache
+        uses: actions/cache/restore@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+        with:
+          path: ${{ env.CACHE_DIR }}
+          key: build-test-cpp-asserts-manylinux-${{ matrix.torch-version }}-v2-${{ github.sha }}
+          restore-keys: |
+            build-test-cpp-asserts-manylinux-${{ matrix.torch-version }}-v2-
+
+      - name: ccache
+        uses: hendrikmuhs/ccache-action@5ebbd400eff9e74630f759d94ddd7b6c26299639 # v1.2.20
+        with:
+          key: ${{ github.job }}-${{ matrix.torch-version }}
+          save: ${{ needs.setup.outputs.write-caches == 1 }}
+
+      - name: Setup workspace and python
+        uses: ./.github/actions/setup-build
+
+      - name: Display Python version and path
+        run: |
+          python -c "import sys; print(sys.version)"
+          which python
+
+      - name: Install python deps (torch-${{ matrix.torch-version }})
+        run: |
+          cd $GITHUB_WORKSPACE
+          ./build_tools/ci/install_python_deps.sh ${{ matrix.torch-version }}
+
+      - name: Build project
+        run: |
+          export cache_dir="${{ env.CACHE_DIR }}"
+          bash build_tools/ci/build_posix.sh
+
+      - name: Save cache
+        uses: actions/cache/save@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+        if: ${{ !cancelled() }}
+        with:
+          path: ${{ env.CACHE_DIR }}
+          key: build-test-cpp-asserts-manylinux-${{ matrix.torch-version }}-v2-${{ github.sha }}
+
+      - name: Integration tests (torch-${{ matrix.torch-version }})
+        run: |
+          bash build_tools/ci/test_posix.sh ${{ matrix.torch-version }}
+
+      - name: Check generated sources (torch-nightly only)
+        if: ${{ matrix.torch-version == 'nightly' }}
+        run: |
+          bash build_tools/ci/check_generated_sources.sh

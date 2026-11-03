@@ -1,0 +1,26 @@
+iree_lit_test_suite(
+  NAME
+    lit
+  SRCS
+    "apply_pdl_patterns_torch.mlir"
+    "assume_strict_symbols.mlir"
+    "auto_input_conversion.mlir"
+    "auto_input_conversion_with_transients.mlir"
+    "attention.mlir"
+    "bind_symbolic_shapes.mlir"
+    "bitcast_tensor.mlir"
+    "func_conversion.mlir"
+    "func_conversion_invalid.mlir"
+    "func_conversion_transients.mlir"
+    "scan.mlir"
+    "scatter.mlir"
+    "sort.mlir"
+    "torch_to_iree.mlir"
+    "unstructured_linalg_ext.mlir"
+  DATA
+    "torch.pdl.mlir"
+  TOOLS
+    FileCheck
+    iree-compile
+    iree-opt
+)

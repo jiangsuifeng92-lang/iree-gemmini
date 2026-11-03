@@ -1,0 +1,68 @@
+{
+  "baseline_description": "MNIST timing immediately before H steps 6/7/8: 4-thread non-debug ArmGemminiConfig, no waveform, 2026-10-25; 108 dispatch requests and 134 workgroups.",
+  "baseline_timing_sha256": "da78ada7e2336201ba9966a36d26e6b23d1e283209b8dc1be175382f524660c2",
+  "current_timing_sha256": "c7755a348525f3154cf30478350927fbc3719873f78d43c510c7fd4c0a81b9d2",
+  "simulator_path": "/home/aiden/iree_rocket_gemmini/H_arm_gemmini_compiler_opt/toolchain/sim/simulator-chipyard.harness-ArmGemminiConfig",
+  "simulator_sha256": "71fae2a8415ebf0969d2029ff6c9805a9bc680acb2fcb469fe63cb5e5484da15",
+  "simulator_matches_optimization_baseline": true,
+  "waveform_dump": false,
+  "baseline_wall_seconds": 1276.561,
+  "current_wall_seconds": 1014.054,
+  "saved_seconds": 262.507,
+  "wall_time_reduction_percent": 20.56,
+  "speedup_factor": 1.259,
+  "baseline_phases_seconds": {
+    "vmfb_load": 32.408,
+    "context_and_query": 608.508,
+    "query_to_main": 10.84,
+    "model_dispatch": 582.349,
+    "output_read_and_validation": 27.158
+  },
+  "current_phases_seconds": {
+    "vmfb_load": 62.776,
+    "context_and_query": 259.075,
+    "query_to_main": 21.3,
+    "model_dispatch": 581.591,
+    "output_read_and_validation": 59.087
+  },
+  "phase_speedup_factors": {
+    "vmfb_load": 0.516,
+    "context_and_query": 2.349,
+    "query_to_main": 0.509,
+    "model_dispatch": 1.001,
+    "output_read_and_validation": 0.46
+  },
+  "baseline_query": {
+    "query_count": 1,
+    "query_exports": 108,
+    "slot_cycles": 28495,
+    "handler_cycles": 27570
+  },
+  "current_query": {
+    "query_count": 1,
+    "query_exports": 8,
+    "slot_cycles": 3774,
+    "handler_cycles": 2837
+  },
+  "baseline_dispatch": {
+    "dispatch_count": 108,
+    "workgroups": 134,
+    "slot_cycles": 973795,
+    "handler_cycles": 897653
+  },
+  "current_dispatch": {
+    "dispatch_count": 8,
+    "workgroups": 34,
+    "slot_cycles": 856576,
+    "handler_cycles": 827478
+  },
+  "baseline_cycles_since_queue_ready": 5526936,
+  "current_cycles_since_queue_ready": 2141439,
+  "mnist_validation": {
+    "predicted": 7,
+    "expected": 7,
+    "max_error_x1e6": 0,
+    "pass": true
+  },
+  "gemmini_counter_note": "GEMMINI PERF C wrapper reports 0 calls because direct-linked native kernels bypass it; no waveform was captured, so this counter is not a Gemmini busy-cycle measurement."
+}

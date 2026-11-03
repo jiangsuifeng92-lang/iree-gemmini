@@ -1,0 +1,57 @@
+%Warning: System has stack size 8192 kb which may be too small; suggest 'ulimit -c 12721' or larger
+[UART] UART0 is here (stdin/stdout).
+ARM IREE: initialize VM
+[HOST TIMING] stage=arm_iree_start elapsed_seconds=2.085 wall_utc=2026-10-28T03:05:19.765860+00:00
+NPU ready: Rocket dispatch executor, queue ABI 4
+[ARM PERF] marker=arm_iree_start soc_cycles=5125 active_cycles=1014
+ARM IREE: connect NPU
+ARM NPU: wait for queue ready
+ARM NPU: queue ready, magic=1196314709 version=4
+[HOST TIMING] stage=npu_queue_ready elapsed_seconds=10.769 wall_utc=2026-10-28T03:05:28.449969+00:00
+ARM NPU: allocate loader
+ARM NPU: buffer allocator initialized
+ARM NPU: HAL device initialized
+ARM IREE: create HAL module
+ARM IREE: load model VMFB bytes=27977
+[HOST TIMING] stage=vmfb_load_start elapsed_seconds=22.294 wall_utc=2026-10-28T03:05:39.974540+00:00
+[ARM PERF] marker=vmfb_load_start soc_cycles=50107 active_cycles=12546
+ARM IREE: model VMFB loaded
+[HOST TIMING] stage=vmfb_loaded elapsed_seconds=85.070 wall_utc=2026-10-28T03:06:42.750847+00:00
+[ARM PERF] marker=vmfb_loaded soc_cycles=196938 active_cycles=58039
+ARM IREE: initialize model context
+[HOST TIMING] stage=context_init_start elapsed_seconds=88.279 wall_utc=2026-10-28T03:06:45.959904+00:00
+[ARM PERF] marker=context_init_start soc_cycles=205451 active_cycles=61505
+ARM NPU: QUERY request ordinal=0
+ARM NPU: QUERY completed=8
+ARM NPU: QUERY phase complete count=8
+[HOST TIMING] stage=query_complete elapsed_seconds=347.354 wall_utc=2026-10-28T03:11:05.034997+00:00
+[ARM PERF] marker=query_complete soc_cycles=794700 active_cycles=226379
+ARM IREE: invoke module.main
+[HOST TIMING] stage=module_main_start elapsed_seconds=368.654 wall_utc=2026-10-28T03:11:26.335134+00:00
+[ARM PERF] marker=module_main_start soc_cycles=842355 active_cycles=237753
+NPU dispatch 1: library=1 ordinal=0 status=0 workgroups=1
+ARM NPU: DISPATCH requests=1 workgroups=1
+NPU dispatch 2: library=1 ordinal=1 status=0 workgroups=13
+NPU dispatch 3: library=1 ordinal=2 status=0 workgroups=14
+ARM IREE: read output
+[HOST TIMING] stage=output_read_start elapsed_seconds=950.245 wall_utc=2026-10-28T03:21:07.925938+00:00
+[ARM PERF] marker=output_read_start soc_cycles=2045164 active_cycles=530031
+MNIST score[0] x1e6=-6374521
+MNIST score[1] x1e6=-4974325
+MNIST score[2] x1e6=-5248231
+MNIST score[3] x1e6=-5338557
+MNIST score[4] x1e6=-6374521
+MNIST score[5] x1e6=-6374521
+MNIST score[6] x1e6=-6374521
+MNIST score[7] x1e6=-32507
+MNIST score[8] x1e6=-6374521
+MNIST score[9] x1e6=-5037516
+MNIST predicted=7 expected=7 max_error_x1e6=0
+[ROCKET PERF] query_count=1 query_exports=8 slot_cycles=3774 handler_cycles=2837
+[ROCKET PERF] dispatch_count=8 workgroups=34 slot_cycles=856576 handler_cycles=827478
+[ROCKET PERF] cycles_since_queue_ready=2141439
+[GEMMINI PERF] calls=0 call_latency_cycles=0
+MNIST PASS (Arm IREE / Rocket / Gemmini)
+[HOST TIMING] stage=mnist_pass elapsed_seconds=1009.332 wall_utc=2026-10-28T03:22:07.012527+00:00
+[ARM PERF] marker=mnist_pass soc_cycles=2160244 active_cycles=566806
+- /home/aiden/chipyard/sims/verilator/generated-src/chipyard.harness.TestHarness.ArmGemminiConfig/gen-collateral/TestDriver.v:158: Verilog $finish

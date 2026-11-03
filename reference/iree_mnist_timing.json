@@ -1,0 +1,251 @@
+{
+  "simulator_start_utc": "2026-10-28T03:05:17.680728+00:00",
+  "simulator_end_utc": "2026-10-28T03:22:11.735055+00:00",
+  "simulator_wall_seconds": 1014.054,
+  "return_code": 0,
+  "command": [
+    "stdbuf",
+    "-oL",
+    "-eL",
+    "/home/aiden/iree_rocket_gemmini/H_arm_gemmini_compiler_opt/toolchain/sim/simulator-chipyard.harness-ArmGemminiConfig",
+    "+permissive",
+    "+g_host_mem_hex=/home/aiden/iree_rocket_gemmini/H_arm_gemmini_compiler_opt/G_arm_gemmini/build/iree-firmware/mnist/host/host.hex",
+    "+loadmem=/home/aiden/iree_rocket_gemmini/H_arm_gemmini_compiler_opt/G_arm_gemmini/build/iree-firmware/mnist/loadmem.elf",
+    "+max-cycles=1000000000",
+    "+permissive-off",
+    "/home/aiden/iree_rocket_gemmini/H_arm_gemmini_compiler_opt/G_arm_gemmini/build/iree-firmware/mnist/npu/npu.elf"
+  ],
+  "markers": {
+    "arm_iree_start": {
+      "elapsed_seconds": 2.0850695589906536,
+      "wall_utc": "2026-10-28T03:05:19.765860+00:00"
+    },
+    "npu_queue_ready": {
+      "elapsed_seconds": 10.769180540984962,
+      "wall_utc": "2026-10-28T03:05:28.449969+00:00"
+    },
+    "vmfb_load_start": {
+      "elapsed_seconds": 22.2937480469991,
+      "wall_utc": "2026-10-28T03:05:39.974540+00:00"
+    },
+    "vmfb_loaded": {
+      "elapsed_seconds": 85.0700578649994,
+      "wall_utc": "2026-10-28T03:06:42.750847+00:00"
+    },
+    "context_init_start": {
+      "elapsed_seconds": 88.27911725299782,
+      "wall_utc": "2026-10-28T03:06:45.959904+00:00"
+    },
+    "query_complete": {
+      "elapsed_seconds": 347.354205665004,
+      "wall_utc": "2026-10-28T03:11:05.034997+00:00"
+    },
+    "module_main_start": {
+      "elapsed_seconds": 368.654347217991,
+      "wall_utc": "2026-10-28T03:11:26.335134+00:00"
+    },
+    "output_read_start": {
+      "elapsed_seconds": 950.2451338020037,
+      "wall_utc": "2026-10-28T03:21:07.925938+00:00"
+    },
+    "mnist_pass": {
+      "elapsed_seconds": 1009.3317270499829,
+      "wall_utc": "2026-10-28T03:22:07.012527+00:00"
+    }
+  },
+  "core_profile": {
+    "rtl_clock_period_ns": 1.0,
+    "clock_domains_period_ns": {
+      "testharness": 1.0,
+      "arm_host": 2.0,
+      "rocket": 1.0,
+      "gemmini": 1.0
+    },
+    "arm_markers": {
+      "arm_iree_start": {
+        "soc_cycles": 5125,
+        "active_cycles": 1014
+      },
+      "vmfb_load_start": {
+        "soc_cycles": 50107,
+        "active_cycles": 12546
+      },
+      "vmfb_loaded": {
+        "soc_cycles": 196938,
+        "active_cycles": 58039
+      },
+      "context_init_start": {
+        "soc_cycles": 205451,
+        "active_cycles": 61505
+      },
+      "query_complete": {
+        "soc_cycles": 794700,
+        "active_cycles": 226379
+      },
+      "module_main_start": {
+        "soc_cycles": 842355,
+        "active_cycles": 237753
+      },
+      "output_read_start": {
+        "soc_cycles": 2045164,
+        "active_cycles": 530031
+      },
+      "mnist_pass": {
+        "soc_cycles": 2160244,
+        "active_cycles": 566806
+      }
+    },
+    "arm_phase_cycles": {
+      "vmfb_load": {
+        "soc_cycles": 146831,
+        "arm_active_cycles": 45493
+      },
+      "context_and_query": {
+        "soc_cycles": 589249,
+        "arm_active_cycles": 164874
+      },
+      "query_to_main": {
+        "soc_cycles": 47655,
+        "arm_active_cycles": 11374
+      },
+      "model_dispatch": {
+        "soc_cycles": 1202809,
+        "arm_active_cycles": 292278
+      },
+      "output_read_and_check": {
+        "soc_cycles": 115080,
+        "arm_active_cycles": 36775
+      },
+      "iree_start_to_pass": {
+        "soc_cycles": 2155119,
+        "arm_active_cycles": 565792
+      }
+    },
+    "rocket": {
+      "query": {
+        "query_count": 1,
+        "query_exports": 8,
+        "slot_cycles": 3774,
+        "handler_cycles": 2837
+      },
+      "dispatch": {
+        "dispatch_count": 8,
+        "workgroups": 34,
+        "slot_cycles": 856576,
+        "handler_cycles": 827478
+      },
+      "cycles_since_queue_ready": 2141439
+    },
+    "gemmini_call_latency": {
+      "calls": 0,
+      "call_latency_cycles": 0
+    },
+    "notes": [
+      "ARM soc/active counters use the 500 MHz host F-bus clock (2 ns per cycle).",
+      "Rocket mcycle uses the 1 GHz Rocket tile clock and includes synchronous Gemmini call latency.",
+      "Gemmini busy time uses the 1 GHz tile clock. The C import wrapper counter may miss direct-linked kernel calls; use the RTL busy waveform for hardware busy cycles.",
+      "Core cycle times overlap and must not be added to simulator wall time."
+    ],
+    "derived_times": {
+      "arm_active_cycles_total": {
+        "seconds": 0.001133612,
+        "minutes": 1.8893533e-05
+      },
+      "arm_phases": {
+        "vmfb_load": {
+          "soc_elapsed": {
+            "seconds": 0.000293662,
+            "minutes": 4.894367e-06
+          },
+          "arm_active": {
+            "seconds": 9.0986e-05,
+            "minutes": 1.516433e-06
+          }
+        },
+        "context_and_query": {
+          "soc_elapsed": {
+            "seconds": 0.001178498,
+            "minutes": 1.9641633e-05
+          },
+          "arm_active": {
+            "seconds": 0.000329748,
+            "minutes": 5.4958e-06
+          }
+        },
+        "query_to_main": {
+          "soc_elapsed": {
+            "seconds": 9.531e-05,
+            "minutes": 1.5885e-06
+          },
+          "arm_active": {
+            "seconds": 2.2748e-05,
+            "minutes": 3.79133e-07
+          }
+        },
+        "model_dispatch": {
+          "soc_elapsed": {
+            "seconds": 0.002405618,
+            "minutes": 4.0093633e-05
+          },
+          "arm_active": {
+            "seconds": 0.000584556,
+            "minutes": 9.7426e-06
+          }
+        },
+        "output_read_and_check": {
+          "soc_elapsed": {
+            "seconds": 0.00023016,
+            "minutes": 3.836e-06
+          },
+          "arm_active": {
+            "seconds": 7.355e-05,
+            "minutes": 1.225833e-06
+          }
+        },
+        "iree_start_to_pass": {
+          "soc_elapsed": {
+            "seconds": 0.004310238,
+            "minutes": 7.18373e-05
+          },
+          "arm_active": {
+            "seconds": 0.001131584,
+            "minutes": 1.8859733e-05
+          }
+        }
+      },
+      "rocket": {
+        "query_handler": {
+          "seconds": 2.837e-06,
+          "minutes": 4.7283e-08
+        },
+        "query_slots": {
+          "seconds": 3.774e-06,
+          "minutes": 6.29e-08
+        },
+        "dispatch_handler": {
+          "seconds": 0.000827478,
+          "minutes": 1.37913e-05
+        },
+        "dispatch_slots": {
+          "seconds": 0.000856576,
+          "minutes": 1.4276267e-05
+        },
+        "since_queue_ready": {
+          "seconds": 0.002141439,
+          "minutes": 3.569065e-05
+        }
+      },
+      "gemmini_call_latency": {
+        "seconds": 0.0,
+        "minutes": 0.0
+      }
+    }
+  },
+  "durations_seconds": {
+    "launch_to_arm_iree_start": 2.0850695589906536,
+    "arm_iree_start_to_module_main_including_query": 366.569,
+    "launch_to_module_main_including_query": 368.654347217991,
+    "module_main_to_output_read": 581.591,
+    "output_read_to_mnist_pass": 59.087
+  }
+}

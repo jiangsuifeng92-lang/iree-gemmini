@@ -1,0 +1,216 @@
+// Copyright 2026 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#include "compiler/Target/GemminiLinkerTool.h"
+
+#include <cstdlib>
+#include <optional>
+#include <string>
+
+#include "iree/compiler/Utils/StringUtils.h"
+#include "iree/compiler/Utils/ToolUtils.h"
+#include "llvm/ADT/SmallString.h"
+#include "llvm/ADT/StringExtras.h"
+#include "llvm/IR/Function.h"
+#include "llvm/Support/FileSystem.h"
+#include "llvm/Support/Path.h"
+#include "llvm/Support/raw_ostream.h"
+
+#define DEBUG_TYPE "gemmini-linker"
+
+namespace mlir::gemmini_compiler {
+namespace {
+
+using LinkerTool = iree_compiler::IREE::HAL::LinkerTool;
+using Artifact = iree_compiler::IREE::HAL::Artifact;
+using Artifacts = iree_compiler::IREE::HAL::Artifacts;
+using LLVMTargetOptions = iree_compiler::IREE::HAL::LLVMTargetOptions;
+
+class GemminiLinkerTool final : public LinkerTool {
+ public:
+  GemminiLinkerTool(const llvm::Triple& targetTriple,
+                     LLVMTargetOptions targetOptions,
+                     std::string linkerScriptPath)
+      : LinkerTool(targetTriple, std::move(targetOptions)),
+        linkerScriptPath_(std::move(linkerScriptPath)) {}
+
+  std::string getLinkerPath() const {
+    if (!targetOptions.embeddedLinkerPath.empty()) {
+      return targetOptions.embeddedLinkerPath;
+    }
+
+    std::string toolPath = mlir::iree_compiler::findTool(
+        "../../toolchain_rv32/bin/riscv32-unknown-elf-ld");
+    if (!toolPath.empty()) {
+      return toolPath;
+    }
+
+    llvm::errs() << "error: required `riscv32-unknown-elf-ld` was not found "
+                    "after searching:\n"
+                 << " * configured LLVM target linker path\n"
+                 << " * compiler executable/dylib directory\n"
+                 << " * system PATH\n";
+
+    return "";
+  }
+
+  std::string getLinkerScriptPath() const {
+    if (!linkerScriptPath_.empty()) {
+      return linkerScriptPath_;
+    }
+
+    std::string scriptPath =
+        mlir::iree_compiler::findTool("../../crt/gemmini_tcm.ld");
+    if (!scriptPath.empty()) {
+      return scriptPath;
+    }
+
+    return "";
+  }
+
+  mlir::LogicalResult configureModule(
+      llvm::Module* llvmModule,
+      llvm::ArrayRef<llvm::Function*> exportedFuncs) override {
+    for (auto& llvmFunc : *llvmModule) {
+      llvmFunc.addFnAttr("nonlazybind");
+      llvmFunc.setUWTableKind(llvm::UWTableKind::None);
+    }
+
+    if (targetOptions.target.debugSymbols) {
+      for (auto* llvmFunc : exportedFuncs) {
+        llvmFunc->setVisibility(
+            llvm::GlobalValue::VisibilityTypes::DefaultVisibility);
+        llvmFunc->setLinkage(llvm::GlobalValue::LinkageTypes::ExternalLinkage);
+        llvmFunc->setUWTableKind(llvm::UWTableKind::Default);
+        llvmFunc->addFnAttr("noinline");
+      }
+    }
+
+    return mlir::success();
+  }
+
+  std::optional<Artifacts> linkDynamicLibrary(
+      llvm::StringRef libraryName,
+      llvm::ArrayRef<Artifact> objectFiles) override {
+    Artifacts artifacts;
+
+    if (!objectFiles.empty()) {
+      artifacts.libraryFile =
+          Artifact::createVariant(objectFiles.front().path, "so");
+    } else {
+      artifacts.libraryFile = Artifact::createTemporary(libraryName, "so");
+    }
+    artifacts.libraryFile.close();
+
+    const std::string linkerPath = getLinkerPath();
+    if (linkerPath.empty()) {
+      return std::nullopt;
+    }
+
+    const std::string linkerScriptPath = getLinkerScriptPath();
+    if (linkerScriptPath.empty()) {
+      llvm::errs() << "error: Gemmini linker script path was not configured\n";
+      return std::nullopt;
+    }
+
+    llvm::SmallString<256> archiveDirectory(linkerScriptPath);
+    llvm::sys::path::remove_filename(archiveDirectory);
+
+    llvm::SmallString<256> ireeArchivePath(archiveDirectory);
+    llvm::sys::path::append(ireeArchivePath, "libgemmini_iree.a");
+
+    llvm::SmallString<256> crtArchivePath(archiveDirectory);
+    llvm::sys::path::append(crtArchivePath, "libgemmini_crt.a");
+
+    const std::string ireeArchivePathString(ireeArchivePath);
+    const std::string crtArchivePathString(crtArchivePath);
+
+    llvm::SmallVector<std::string> flags = {
+        mlir::iree_compiler::escapeCommandLineComponent(linkerPath),
+        "-o " + mlir::iree_compiler::escapeCommandLineComponent(
+                    artifacts.libraryFile.path),
+        "--build-id=none",
+        "-nostdlib",
+        "-static",
+        "-T " +
+            mlir::iree_compiler::escapeCommandLineComponent(linkerScriptPath),
+        "--no-undefined",
+        "--gc-sections",
+        "--no-warn-rwx-segments",
+    };
+
+    LLVM_DEBUG(llvm::SmallString<256> mapFilePath(artifacts.libraryFile.path);
+               llvm::sys::path::replace_extension(mapFilePath, "map");
+               flags.push_back("-Map=" + std::string(mapFilePath)););
+
+    if (!targetOptions.target.debugSymbols) {
+      flags.push_back("--strip-debug");
+      flags.push_back("--discard-all");
+    }
+
+    for (const auto& objectFile : objectFiles) {
+      flags.push_back(
+          mlir::iree_compiler::escapeCommandLineComponent(objectFile.path));
+    }
+
+    flags.push_back("--whole-archive");
+
+    flags.push_back(
+        mlir::iree_compiler::escapeCommandLineComponent(ireeArchivePathString));
+
+    flags.push_back(
+        mlir::iree_compiler::escapeCommandLineComponent(crtArchivePathString));
+
+    flags.push_back("--no-whole-archive");
+
+    if (mlir::failed(runLinkCommand(llvm::join(flags, " "), ""))) {
+      if (targetOptions.keepLinkerArtifacts) {
+        for (auto& objectFile : objectFiles) {
+          if (objectFile.outputFile) {
+            llvm::errs() << "Gemmini linker input preserved: "
+                         << objectFile.outputFile->getFilename() << "\n";
+            objectFile.keep();
+          }
+        }
+      }
+
+      return std::nullopt;
+    }
+
+    if (targetOptions.keepLinkerArtifacts) {
+      artifacts.keepAllFiles();
+
+      for (auto& objectFile : objectFiles) {
+        objectFile.keep();
+      }
+    }
+
+    return artifacts;
+  }
+
+ private:
+  std::string linkerScriptPath_;
+};
+
+}  // namespace
+
+std::unique_ptr<iree_compiler::IREE::HAL::LinkerTool> createGemminiLinkerTool(
+    const llvm::Triple& targetTriple,
+    iree_compiler::IREE::HAL::LLVMTargetOptions& targetOptions,
+    std::string linkerScriptPath) {
+  return std::make_unique<GemminiLinkerTool>(targetTriple, targetOptions,
+                                              std::move(linkerScriptPath));
+}
+
+}  // namespace mlir::gemmini_compiler

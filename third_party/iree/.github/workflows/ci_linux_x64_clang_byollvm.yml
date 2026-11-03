@@ -1,0 +1,40 @@
+# Copyright 2024 The IREE Authors
+#
+# Licensed under the Apache License v2.0 with LLVM Exceptions.
+# See https://llvm.org/LICENSE.txt for license information.
+# SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+
+name: CI - Linux x64 clang BYO LLVM
+
+on:
+  schedule:
+    # Weekday mornings at 09:15 UTC = 01:15 PST (UTC - 8).
+    - cron: "15 9 * * 1-5"
+  workflow_dispatch:
+  workflow_call:
+
+jobs:
+  linux_x64_clang_byollvm:
+    if: ${{ github.repository_owner == 'iree-org' || github.event_name != 'schedule' }}
+    runs-on: ubuntu-24.04
+    container: ghcr.io/iree-org/cpubuilder_ubuntu_jammy@sha256:78a558b999b230f7e1da376639e14b44f095f30f1777d6a272ba48c0bbdd4ccb
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: "Checking out repository"
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          submodules: true
+      - name: Install Python requirements
+        run: python3 -m pip install -r ./build_tools/github_actions/ci_requirements.txt
+      - name: "Building and testing with bring-your-own-LLVM"
+        run: ./build_tools/cmake/build_and_test_byo_llvm.sh
+
+      - name: Post to Discord on Failure
+        uses: sarisia/actions-status-discord@eb045afee445dc055c18d3d90bd0f244fd062708 # v1.16.0
+        if: failure() && github.ref_name == 'main' && github.repository_owner == 'iree-org'
+        with:
+          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          description: "The ${{ github.workflow }} workflow failed"
+          url: "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}"

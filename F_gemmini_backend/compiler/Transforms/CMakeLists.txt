@@ -1,0 +1,48 @@
+iree_tablegen_library(
+  NAME
+    PassesIncGen
+  TD_FILE
+    "Passes.td"
+  OUTS
+    --gen-pass-decls compiler/Transforms/Passes.h.inc
+)
+
+iree_cc_library(
+  NAME
+    Transforms
+  HDRS
+    "Passes.h"
+  TEXTUAL_HDRS
+    "compiler/Transforms/Passes.h.inc"
+  SRCS
+    "GemminiLowerDispatch.cpp"
+    "GemminiSelect.cpp"
+    "GemminiPlanning.cpp"
+    "GemminiGraphOptimization.cpp"
+    "Passes.cpp"
+  INCLUDES
+    "${CMAKE_SOURCE_DIR}"
+    "${CMAKE_SOURCE_DIR}/../include"
+    "${CMAKE_CURRENT_BINARY_DIR}"
+  DEPS
+    ::PassesIncGen
+    iree::compiler::Codegen::Common::CPU::CommonCPUPasses
+    iree::compiler::Codegen::Common::CPU::PassHeaders
+    iree::compiler::Codegen::Dialect::Codegen::IR::IREECodegenDialect
+    iree::compiler::Codegen::Utils
+    MLIRArithDialect
+    MLIRFuncDialect
+    MLIRFunctionInterfaces
+    MLIRIR
+    MLIRLinalgDialect
+    MLIRLinalgUtils
+    MLIRMemRefDialect
+    MLIRSideEffectInterfaces
+    MLIRAsmParser
+    MLIRParser
+    MLIRTensorDialect
+    MLIRLinalgTransforms
+    MLIRTransforms
+    MLIRPass
+  PUBLIC
+)
